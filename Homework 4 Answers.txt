@@ -1,0 +1,22 @@
+(1) 
+The experimental and control groups are similar in the fact that the vast majority of providers administered 5 or fewer tests. However, the control group has a maximum of 4 tests per provider, and the experimental group has two providers with 12 and 17 tests. This negatively skews the experimental data and raises its avereage to 2.5, whereas the average number of tests for the control group is 0.8182. Their medians are both, which may be a better measure of central tendancy given the skewness. Also, there seems to be a relationship between the standard deviation and the means of these samples. Therefore, a gamma distribution (perhaps chi-squared distribution) might fit these data well given its high probability density at low values of X.
+
+(2) 
+"mean of distribution:  3.66666666666667"
+"variance of distribution:  1.52177777777778"
+
+"mean of sample:  3.64125"
+"variance of sample:  1.59766666666667"
+
+(3) 
+N2 is 4 times the size of N1. See hw4_prob3.png for algebraic solution
+
+(4)
+# to get value of 90th percentile
+mean = 650
+sd = 60
+zval = qnorm(.9, mean, sd)
+726.893093932676
+
+(5)
+The average of the two average speeds is not equal to the global average speed of the entire trip. To get this We would need to do 120 miles * (1 hr / 40 miles ) + 120 miles * (1 hr / 60 miles) = 3 hrs + 2 hrs = 5 hours.
