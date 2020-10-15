@@ -1,0 +1,57 @@
+(1) When I enter zygosity into the linear model, the beta for the intercept goes from 4.0 to 1.9, but for zygosity itself, the beta is 1.5 with a p-value of 2.9e-10, so it is highly significant. At the same time the adjusted R2 for this model is 0.045, so even though zygosity does significantly affect the difference in math scores, it explains very little variance in these scores between pairs of twins. This corresponds to the discrepancy seen in a boxplot of the differences between twins when stratified by zygosity. Therefore I fail to accept the null hypothesis that twins are not significantly related to each other on math performance.
+
+Supporting evidence:
+
+One Sample t-test
+
+data:  df.wide$math_diff
+t = 33.429, df = 838, p-value < 2.2e-16
+alternative hypothesis: true mean is not equal to 0
+95 percent confidence interval:
+ 3.786457 4.258835
+sample estimates:
+mean of x 
+ 4.022646 
+ 
+ Also see box plot in hw5_img1.png. 
+ 
+ 
+(2) A linear model predicting beginning salary shows that both interaction terms, sex with education level and sex with age (both scaled), are highly significant. It therefore appears that sex is a moderator of beginning salary. Additionally, the boxplot showing beginning salary stratified by sex shows that the two medians are unlikely to be the same. I therefore fail to accept the null hypothesis that men and women make equivalent salaries when beginning. In other words, it appears women are paid significantly less than men at the beginning in this data set, when considering age and education level as confounders.
+
+Supporting evidence:
+
+    Welch Two Sample t-test
+
+data:  salbeg by sex
+t = 11.987, df = 318.82, p-value < 2.2e-16
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ 2410.475 3357.067
+sample estimates:
+mean in group 0 mean in group 1 
+       8120.558        5236.787 
+       
+Also see box plot in hw5_img2.png
+
+Call:
+lm(formula = salbeg ~ age + edlevel + sex + int_sex_edlevel + 
+    int_sex_age, data = bank)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-5292.4 -1170.6  -244.0   803.4 18602.3 
+
+Coefficients:
+                Estimate Std. Error t value Pr(>|t|)    
+(Intercept)     -2712.48     734.48  -3.693 0.000248 ***
+age                57.31       9.10   6.298 6.95e-10 ***
+edlevel           588.49      38.77  15.180  < 2e-16 ***
+sex             -1845.07     211.21  -8.736  < 2e-16 ***
+int_sex_edlevel  -892.25     114.23  -7.811 3.77e-14 ***
+int_sex_age      -543.21     104.30  -5.208 2.86e-07 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 2110 on 468 degrees of freedom
+Multiple R-squared:  0.5554,     Adjusted R-squared:  0.5507 
+F-statistic: 116.9 on 5 and 468 DF,  p-value: < 2.2e-16
