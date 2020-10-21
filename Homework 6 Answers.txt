@@ -1,0 +1,167 @@
+(1) I’m sending you data from the resiliency dataset ‘resil_data_cleaned.csv’.  I want you to do a logistic regression and predict ‘depression_yn’ from PTSD and total_traumas.  A ‘1’ means yes for both depression and ptsd.  Would TOTAL_RESILIENCY improve the model if added.
+
+First I created a logistic regression model to predict depression_yn using PTSD and total_traumas. This model found both of those variables to be highly significant predictors. Further the AIC for this model was 731.35. I then created a new model which also included TOTAL_RESILIENCY as a predictor variable. In this model, all three variables were found to be highly significant predictors of depression_yn, however this model had an AIC of 712.54. Because TOTAL_RESILIENCY was both highly significant and this model reduces the AIC by 19, it seems that TOTAL_RESILIENCY does improve the model. Just to double check, I used stepAIC to test if the model improves with the addition of TOTAL_RESILIENCY, and stepAIC did not remove any variables.
+
+Evidence:
+
+
+Model 1
+Call:
+glm(formula = depression_yn ~ PTSD + total_traumas, family = binomial(logit), 
+    data = resil)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-2.2598  -0.5630  -0.4378   0.7183   2.2611  
+
+Coefficients:
+              Estimate Std. Error z value Pr(>|z|)    
+(Intercept)   -2.47548    0.19401 -12.760  < 2e-16 ***
+PTSD           2.80630    0.18875  14.868  < 2e-16 ***
+total_traumas  0.17846    0.03402   5.246 1.55e-07 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 1108.44  on 815  degrees of freedom
+Residual deviance:  725.35  on 813  degrees of freedom
+AIC: 731.35
+
+Number of Fisher Scoring iterations: 4
+
+
+
+Model 2
+Call:
+glm(formula = depression_yn ~ PTSD + total_traumas + TOTAL_RESILIENCY, 
+    family = binomial(logit), data = resil)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-2.3144  -0.5613  -0.3642   0.6866   2.3280  
+
+Coefficients:
+                  Estimate Std. Error z value Pr(>|z|)    
+(Intercept)      -0.084883   0.544191  -0.156    0.876    
+PTSD              2.779125   0.192291  14.453  < 2e-16 ***
+total_traumas     0.160777   0.034300   4.687 2.77e-06 ***
+TOTAL_RESILIENCY -0.020669   0.004583  -4.510 6.49e-06 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 1108.44  on 815  degrees of freedom
+Residual deviance:  704.54  on 812  degrees of freedom
+AIC: 712.54
+
+Number of Fisher Scoring iterations: 5
+
+
+Double check using stepAIC
+Start:  AIC=712.54
+depression_yn ~ PTSD + total_traumas + TOTAL_RESILIENCY
+
+                   Df Deviance    AIC
+<none>                  704.54 712.54
+- TOTAL_RESILIENCY  1   725.35 731.35
+- total_traumas     1   727.89 733.89
+- PTSD              1   958.50 964.50
+
+
+
+
+(2)
+First, I ran an AIC analysis to determine which variables should be included in model for predicting vocab scores. Then I trained a model on a training sample of the data (one half of the samples) using those variables and found that fathers education was highly significant, family income was significant, and mothers education was barely non-significant at p=0.0508. This model had an adjusted R-squared value of 0.1193, accounting for about 11% of the variance in vocab scores.
+
+I then used this model to predict vocab scores in a hold-out testing data set (the other half of the samples). In this sample, the model was a highly significant predictor of vocab scores (P<2e-16) and had an adjusted R-squred value of 0.08656, accounting for about 9% of the variance in vocab scores.
+
+A final note is that I simply eliminated any rows that had missing data from this analysis.
+
+Evidence:
+
+
+hw6_img1.png
+
+
+Specify Model Parameters
+Start:  AIC=2336.43
+vocab ~ as.factor(sex) + as.factor(zygosity) + moed + faed + 
+    faminc
+
+                      Df Sum of Sq   RSS    AIC
+- as.factor(zygosity)  1      0.02 15357 2334.4
+- as.factor(sex)       1     13.13 15370 2335.1
+<none>                             15357 2336.4
+- moed                 1     76.56 15434 2338.3
+- faminc               1    112.71 15470 2340.1
+- faed                 1    573.28 15930 2363.0
+
+Step:  AIC=2334.43
+vocab ~ as.factor(sex) + moed + faed + faminc
+
+                      Df Sum of Sq   RSS    AIC
+- as.factor(sex)       1     13.14 15370 2333.1
+<none>                             15357 2334.4
+- moed                 1     77.25 15434 2336.3
++ as.factor(zygosity)  1      0.02 15357 2336.4
+- faminc               1    113.13 15470 2338.2
+- faed                 1    575.03 15932 2361.1
+
+Step:  AIC=2333.1
+vocab ~ moed + faed + faminc
+
+                      Df Sum of Sq   RSS    AIC
+<none>                             15370 2333.1
++ as.factor(sex)       1     13.14 15357 2334.4
+- moed                 1     75.79 15446 2334.9
++ as.factor(zygosity)  1      0.03 15370 2335.1
+- faminc               1    110.33 15481 2336.7
+- faed                 1    579.36 15950 2360.0
+
+
+
+Train Model specified above
+Call:
+lm(formula = vocab ~ moed + faed + faminc, data = mt, subset = r == 
+    1)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-13.9829  -2.9260  -0.1594   3.1883  13.6409 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  16.3603     0.5290  30.929  < 2e-16 ***
+moed          0.3180     0.1626   1.956   0.0508 .  
+faed          0.7554     0.1397   5.408 8.48e-08 ***
+faminc        0.2895     0.1227   2.360   0.0185 *  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 4.451 on 776 degrees of freedom
+  (73 observations deleted due to missingness)
+Multiple R-squared:  0.1227,	Adjusted R-squared:  0.1193 
+F-statistic: 36.18 on 3 and 776 DF,  p-value: < 2.2e-16
+
+
+Test on Holdout Dataset
+Call:
+lm(formula = vocab ~ y, data = mt_holdout)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-16.4867  -3.2286   0.0015   3.0426  12.5050 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  3.57161    2.05190   1.741   0.0822 .  
+y            0.82719    0.09712   8.517   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 4.535 on 754 degrees of freedom
+  (69 observations deleted due to missingness)
+Multiple R-squared:  0.08777,	Adjusted R-squared:  0.08656 
+F-statistic: 72.55 on 1 and 754 DF,  p-value: < 2.2e-16
