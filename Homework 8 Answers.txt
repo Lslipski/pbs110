@@ -1,0 +1,47 @@
+(1)
+When I generate these 2 groups and run a 2-sample t-test 100 times, the unadjusted p-values are significant 54 times out of 100. This makes sense because the actual effect size between the 2 groups is 0.6, so I would expect about 60 significant results by chance. If there were no difference between the groups, I would expect this number to be 5 with an alpha level of 0.05 (I ran this simulation and got this result as well). After performing a bonferroni correction, the number of significant results drops to only 8 because of the much more stringent criteria. The fdr method, which is less stringent than the FWER but more stringent than an uncorrected result should be somewhere in the middle. This is the case, and I find 45 significant results with the fdr correction.
+
+(2)
+From images 1 and 2, it appears there may be some interaction between gender and department, age, and years. I will add these in future models to make sure they controlled for.
+
+	Welch Two Sample t-test
+
+data:  salary by gender
+t = -5.9879, df = 48.822, p-value = 2.473e-07
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -18192.615  -9049.199
+sample estimates:
+mean in group -1  mean in group 1 
+        55719.67         69340.57 
+        
+        
+The t-test of salaries between men and women is very significantly different (p <0.00001). This is likely the best case for women that there is a difference in pay between the genders. I will now add in more variables to control for and see if gender remains a significant predictor of salary. This overall difference can be seen clearly in image 3.
+
+Call:
+lm(formula = salary ~ gender + departm + age + years, data = sal)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-19855  -9715  -2759   6886  34534 
+
+Coefficients:
+               Estimate Std. Error t value Pr(>|t|)    
+(Intercept)     54466.6     5586.7   9.749 1.78e-14 ***
+gender1          8860.6     5101.1   1.737  0.08698 .  
+departmchem       975.4     5480.7   0.178  0.85928    
+departmgeol     12205.9     7831.8   1.559  0.12382    
+departmmath      1127.7     5938.3   0.190  0.84996    
+departmneuro    16947.8     5097.0   3.325  0.00144 ** 
+departmphysics   3807.2     5981.0   0.637  0.52659    
+departmstat      4462.4     4932.6   0.905  0.36887    
+age              6294.4     5626.2   1.119  0.26724    
+years           -1138.8     5711.6  -0.199  0.84257    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 13540 on 67 degrees of freedom
+Multiple R-squared:  0.2913,	Adjusted R-squared:  0.1961 
+F-statistic:  3.06 on 9 and 67 DF,  p-value: 0.003956
+
+Once all prediction variables are entered into a linear model to predict salary, it seems that actually the department is the only significant predictor, and gender is no longer significant. This is likely the best argument for the university -- as we saw above, there are not an equal number of men and women in all departments, and all departments do not have the same average salary. This discrepancies are likely the reason that on the whole it appears men and women make different amounts. However, when these variables are controlled for, only department is a significant predictor of salary, not gender.
