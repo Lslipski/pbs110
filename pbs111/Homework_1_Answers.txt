@@ -1,0 +1,150 @@
+1. Compute 'readgrade' (overall reading ability) which is average of word_id and word_atk . Divide the students into three groups with rougly equal numbers in poor, average, and good based on readgrade (you can use two groups if you prefer). Carry out a three-group (or two group) ANOVA with snd_same as the DV. Now compare that three-group ANOVA to doing a simple regression using snd_same as DV and readgrade as the predictor variable.
+
+ANOVA
+Call:
+   aov(formula = snd_same ~ rgroup, data = reed)
+
+Terms:
+                   rgroup Residuals
+Sum of Squares   468.4033 1630.4300
+Deg. of Freedom         2        51
+
+Residual standard error: 5.654133
+Estimated effects may be unbalanced
+
+Type III Sums of Squares:
+Sum Sq	Df	F value	Pr(>F)
+(Intercept)	13245.4876	1	414.32007	3.851235e-26
+rgroup	468.4033	2	7.32585	1.596861e-03
+Residuals	1630.4300	51	NA	NA
+ rgroup emmean   SE df lower.CL upper.CL
+ 1        12.1 1.30 51      9.5     14.7
+ 2        15.7 1.37 51     13.0     18.5
+ 3        19.2 1.33 51     16.5     21.9
+
+Confidence level used: 0.95 
+
+
+
+Simple Regression
+Call:
+lm(formula = snd_same ~ readgrade, data = reed)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-10.9432  -4.3575   0.3806   2.8896  13.8219 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  10.0375     1.6332   6.146 1.13e-07 ***
+readgrade     1.4116     0.3658   3.859 0.000316 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 5.602 on 52 degrees of freedom
+Multiple R-squared:  0.2226,	Adjusted R-squared:  0.2077 
+F-statistic: 14.89 on 1 and 52 DF,  p-value: 0.0003162
+
+
+
+**In both the anova and the simple regression, the overall reading ability was a significant predictor, but the effect was much more significant in the regression model. This is probably due to a loss of information my converting the continuous variable readgrade into a categorical variable.
+
+
+
+
+
+2. Redo the ANOVA and the regression in Question 1 adding IQ as a covariate. For the ANOVA, compute the adjusted means. Comment on the use of the covariate.
+
+
+ANOVA to see if IQ differs by group
+            Df Sum Sq Mean Sq F value Pr(>F)   
+reed$rgroup  2   2279    1140   5.586 0.0064 **
+Residuals   51  10403     204                  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+ANCOVA with IQ as a covariate
+Sum Sq	Df	F value	Pr(>F)
+(Intercept)	9.376849	1	0.3094423	0.58050373
+iq	115.309428	1	3.8052889	0.05670683
+rgroup	303.971563	2	5.0156332	0.01034695
+Residuals	1515.120568	50	NA	NA
+
+
+Adjusted Means
+ rgroup emmean   SE df lower.CL upper.CL
+ 1        12.4 1.27 50     9.88     15.0
+ 2        16.3 1.37 50    13.58     19.1
+ 3        18.3 1.39 50    15.49     21.1
+
+Confidence level used: 0.95 
+
+
+
+Regression with IQ as a covariate
+Call:
+lm(formula = snd_same ~ iq + readgrade, data = reed)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-10.9575  -3.2072  -0.2541   3.5343  13.3574 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)   
+(Intercept)  1.99958    5.88690   0.340  0.73550   
+iq           0.07824    0.05510   1.420  0.16168   
+readgrade    1.15389    0.40522   2.848  0.00633 **
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 5.548 on 51 degrees of freedom
+Multiple R-squared:  0.2522,	Adjusted R-squared:  0.2229 
+F-statistic: 8.599 on 2 and 51 DF,  p-value: 0.000605
+
+
+
+When including IQ as a covariate, the significance of overall reading level decreased in both the ANOVA and the linear model. In a one-way ANOVA it appears that IQ differs across groups, so including IQ as a covariate is likely 'stealing' signal from the group variable, which is why significance is reduced.
+
+
+3. Do a MANOVA using snd_same, cat_sam, look_sam, mean_sam as DVs and the three-group reading ability as the IV. Anything interesting?
+
+MANOVA
+          Df   Wilks approx F num Df den Df  Pr(>F)  
+rgroup     2 0.69499   2.3944      8     96 0.02124 *
+Residuals 51                                         
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+The Wilks statistic shows that we can only account for about 30% of the variance with the grouping variable.
+
+
+
+Individual ANOVAs
+ Response 1 :
+            Df Sum Sq Mean Sq F value   Pr(>F)   
+rgroup       2  468.4 234.202  7.3258 0.001597 **
+Residuals   51 1630.4  31.969                    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+ Response 2 :
+            Df Sum Sq Mean Sq F value  Pr(>F)  
+rgroup       2  610.2 305.121  4.0942 0.02244 *
+Residuals   51 3800.7  74.524                  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+ Response 3 :
+            Df Sum Sq Mean Sq F value Pr(>F)
+rgroup       2  34.33  17.165  1.1552 0.3231
+Residuals   51 757.82  14.859               
+
+ Response 4 :
+            Df Sum Sq Mean Sq F value Pr(>F)
+rgroup       2   61.7  30.848  0.6451 0.5288
+Residuals   51 2438.8  47.820       
+
+
+I used the Wilks statistic for this manova and found that the group variable significantly explains about 30% of the data. When I ran the individual ANOVAs for this data, I only found significance for snd_same and cat_sam, and not for look_sam or mean_sam. It appears that the group variable for overall reading ability can predict significant differences between snd_same and cat_sam in the 4 dimensional space spanned by those 4 DVs.
+
+

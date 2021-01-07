@@ -1,0 +1,120 @@
+(1)
+From the boxplot for color it looks like there is definitely an effect of blue and green vs red and yellow. So I will include this contrast in my analysis. From the boxplot for size it looks like there isn't a strong effect of room size, but there may be a slight linear or quadratic effect, which I will check for. It would have been better to have an a priori hypothesis to check for this, but I am not sure the hypothesis. 
+
+From these results it appears that there is a significant main effect of color on anxiety with an eta^2 of 0.28. Size and the interaction of color*size were not significant with small eta^2s of 0.003 and 0.07. Further, using a linear model to look for the effects of contrasts representing the hypotheses that green and blue reduce anxiety compared to red and yellow, I found a significant result with p = 2.84e-09. Further, contrasts checking for differences between green and blue and between red and yellow were not significant, which help to confirm the investigator's hypotheses. However, there was no significant effect of size (linear or quadratic) found, which goes against the investigator's hypothesis.
+
+
+
+Evidence:
+
+hw9_q1_img1
+hw9_q1_img2
+
+
+	One-way analysis of means (not assuming equal variances)
+
+data:  anxiety and size
+F = 0.26949, num df = 2.000, denom df = 21.217, p-value = 0.7663
+
+	One-way analysis of means (not assuming equal variances)
+
+data:  anxiety and color
+F = 40.454, num df = 3.000, denom df = 16.464, p-value = 8.098e-08
+
+
+ANOVA using color and size to predict anxiety
+
+            Df Sum Sq Mean Sq F value   Pr(>F)    
+color        3  30445   10148  29.983 4.01e-08 ***
+size         2    593     297   0.877    0.430    
+color:size   6   3160     527   1.556    0.205    
+Residuals   23   7785     338                     
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Same model using type=3 in the ANOVA function
+
+Sum Sq	Df	F value	Pr(>F)
+(Intercept)	541921.7067	1	1601.1217676	9.056519e-23
+color	30974.6255	3	30.5051121	3.428676e-08
+size	563.9487	2	0.8331006	4.473980e-01
+color:size	3159.7185	6	1.5559117	2.050508e-01
+Residuals	7784.6667	23	NA	NA
+
+
+Linear model using all specified contrasts
+
+Call:
+lm(formula = anxiety ~ color * size, data = room)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-29.000 -10.000  -1.333   5.000  50.000 
+
+Coefficients:
+                                  Estimate Std. Error t value Pr(>|t|)    
+(Intercept)                       125.2222     3.1295  40.014  < 2e-16 ***
+colorGB_v_RY                       29.1667     3.1295   9.320 2.84e-09 ***
+colorGB_v_none                      1.7222     4.5134   0.382   0.7063    
+colorRY_v_none                     -8.5000     4.3363  -1.960   0.0622 .  
+sizesize_linear                     4.8333     3.7554   1.287   0.2109    
+sizesize_quadratic                  0.2222     2.2567   0.098   0.9224    
+colorGB_v_RY:sizesize_linear       -4.1667     3.7554  -1.110   0.2787    
+colorGB_v_none:sizesize_linear     11.3333     5.3109   2.134   0.0437 *  
+colorRY_v_none:sizesize_linear     -3.0000     5.3109  -0.565   0.5776    
+colorGB_v_RY:sizesize_quadratic     2.5000     2.2567   1.108   0.2794    
+colorGB_v_none:sizesize_quadratic  -4.6111     3.3119  -1.392   0.1772    
+colorRY_v_none:sizesize_quadratic   1.8333     3.0662   0.598   0.5557    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 18.4 on 23 degrees of freedom
+Multiple R-squared:  0.8146,	Adjusted R-squared:  0.7259 
+F-statistic: 9.185 on 11 and 23 DF,  p-value: 4.841e-06
+
+
+
+#####################################################
+(2)
+Hypotheses: (1) Bullets will penetrate further than Judo or Broadhead arrows (2) There will be no effects of fabric type or clothing fit on penetration
+
+These following evidence shows that my first hypothesis was correct. Bullets penetrate significantly further than arrowheads. This can be seen in hw9_q2.png, but the linear contrast testing this hypothesis is also significant in the linear model. If only running an anova it appears my second hypothesis is true and there is not significant effect of either clothFit or clothType. However, when entered into a linear model that accounts for the effects of arrowheads, it appears that loose fabric and both types of jeans actually have significantly less penetration than do tight fits and t-shirts, with p=0.007, p=3.7e-10, and p=3.69e-07 respectively.
+
+
+Evidence:
+
+hw9_q2_img1
+
+Linear model with specified contrasts
+
+Call:
+lm(formula = pntrt ~ arrowhead + clothFit + clothType, data = arrow)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.4236 -0.6865  0.3507  0.8462  2.0056 
+
+Coefficients:
+                        Estimate Std. Error t value Pr(>|t|)    
+(Intercept)             11.62361    0.26072  44.583  < 2e-16 ***
+arrowheadbullet_v_arrow -2.44028    0.09218 -26.474  < 2e-16 ***
+arrowhead                8.14351    0.22579  36.067  < 2e-16 ***
+clothFit2               -0.73056    0.26072  -2.802  0.00666 ** 
+clothType2              -2.35000    0.31931  -7.360 3.70e-10 ***
+clothType3              -1.80417    0.31931  -5.650 3.69e-07 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 1.106 on 66 degrees of freedom
+Multiple R-squared:  0.9691,	Adjusted R-squared:  0.9667 
+F-statistic: 413.8 on 5 and 66 DF,  p-value: < 2.2e-16
+
+Same model using type=3 in Anova function
+
+	Sum Sq	Df	F value	Pr(>F)
+(Intercept)	1521.000833	1	39.75726022	2.726747e-08
+clothFit	0.000000	1	0.00000000	1.000000e+00
+clothType	19.967222	2	0.26096043	7.711025e-01
+clothFit:clothType	4.895278	2	0.06397854	9.380832e-01
+Residuals	2524.974167	66	NA	NA
+
