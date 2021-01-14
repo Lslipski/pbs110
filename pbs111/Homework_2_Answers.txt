@@ -1,0 +1,157 @@
+1.) Using the data from a perceptual learning experiment (percep_learn.csv), carry our four analyses: (please treat the variable ‘trial’ as a factor for now.)
+a. A traditional repeated measures analysis with no corrections.
+b. The above analysis with corrections.
+c. The MANOVA approach.
+
+A.) 
+    The Histogram of per_corr looks approximately normal with no obvious correlation between group means and variances. Performing an ANOVA with no corrections and including subject Error we get:
+    
+    Error: subj
+          Df Sum Sq Mean Sq F value Pr(>F)  
+group      1   3778    3778   4.541 0.0445 *
+Residuals 22  18303     832                 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Error: Within
+            Df Sum Sq Mean Sq F value   Pr(>F)    
+trial        4  15472    3868 210.925  < 2e-16 ***
+group:trial  4    388      97   5.289 0.000728 ***
+Residuals   88   1614      18                     
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+From this it appears that there is a significant difference in perceptual learning between the groups at the p < 0.05 level.
+
+
+
+
+B.) Next I used ezANOVA to run the analysis including the GG and HF corrections:
+    $ANOVA
+       Effect DFn DFd         SSn       SSd          F            p p<.05
+1 (Intercept)   1  22 500253.1756 18303.414 601.285098 1.811481e-17     *
+2       group   1  22   3777.9154 18303.414   4.540909 4.451505e-02     *
+3       trial   4  88  15471.9328  1613.764 210.924554 3.313262e-44     *
+4 group:trial   4  88    387.9301  1613.764   5.288543 7.284997e-04     *
+         ges
+1 0.96171028
+2 0.15943872
+3 0.43719473
+4 0.01910505
+
+$`Mauchly's Test for Sphericity`
+       Effect         W          p p<.05
+3       trial 0.2802198 0.00213143     *
+4 group:trial 0.2802198 0.00213143     *
+
+$`Sphericity Corrections`
+       Effect      GGe        p[GG] p[GG]<.05       HFe        p[HF] p[HF]<.05
+3       trial 0.575519 1.935612e-26         * 0.6466131 2.028532e-29         *
+4 group:trial 0.575519 5.972171e-03         * 0.6466131 4.180082e-03         *
+
+The data do not seem to have sphericity, so the corrections were applied automatically. Once applied, the effect of group was still found to be significant, but both correction factors were less than 0.75, so they probably are not good enough.
+
+
+
+C.) Finally, I ran a MANOVA on the data:
+Term: learn_wide$group:confactor 
+
+ Response transformation matrix:
+     confactor1 confactor2 confactor3 confactor4
+[1,]          1          0          0          0
+[2,]          0          1          0          0
+[3,]          0          0          1          0
+[4,]          0          0          0          1
+[5,]         -1         -1         -1         -1
+
+Sum of squares and products for the hypothesis:
+           confactor1 confactor2 confactor3 confactor4
+confactor1   715.1606  291.52665  263.88401  180.97303
+confactor2   291.5266  118.83734  107.56915   73.77148
+confactor3   263.8840  107.56915   97.36941   66.77645
+confactor4   180.9730   73.77148   66.77645   45.79564
+
+Multivariate Tests: learn_wide$group:confactor
+                 Df test stat approx F num Df den Df   Pr(>F)  
+Pillai            1 0.4204049 3.445377      4     19 0.028062 *
+Wilks             1 0.5795951 3.445377      4     19 0.028062 *
+Hotelling-Lawley  1 0.7253425 3.445377      4     19 0.028062 *
+Roy               1 0.7253425 3.445377      4     19 0.028062 *
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Here, the the effect of group was still found to be significant at the p < 0.05 level. Given that all 3 tests found group to be significant, though barely, I am somewhat confident that the effect of group on perceptual learning is different between groups.
+
+
+
+
+
+2.) See if margarine A is superior to B in reducing cholesterol. Treat measurement period as a factor. Data are in chol2_dat.txt
+
+The histogram of the cholesterol levels looks to be approximately normal. 
+
+A.) Performing an ANOVA with no corrections I obtain the following:
+Error: ID
+          Df Sum Sq Mean Sq F value Pr(>F)
+Margarine  1   5.46   5.459   1.446  0.247
+Residuals 16  60.41   3.775               
+
+Error: Within
+                Df Sum Sq Mean Sq F value Pr(>F)    
+phase            2  4.320  2.1598 259.490 <2e-16 ***
+Margarine:phase  2  0.080  0.0398   4.777 0.0153 *  
+Residuals       32  0.266  0.0083                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+This shows a slightly significant difference on cholesterol levels between types of Margarine.
+
+B.) Next, using ezANOVA I corrected the above results with the GG and HF corrections:
+$ANOVA
+           Effect DFn DFd          SSn        SSd          F            p p<.05
+1     (Intercept)   1  16 1.950125e+03 60.4066593 516.532406 1.321812e-13     *
+2       Margarine   1  16 5.459424e+00 60.4066593   1.446046 2.466580e-01      
+3           phase   2  32 4.319544e+00  0.2663407 259.489821 1.675833e-20     *
+4 Margarine:phase   2  32 7.951481e-02  0.2663407   4.776727 1.529979e-02     *
+          ges
+1 0.969826404
+2 0.082552910
+3 0.066462153
+4 0.001308832
+
+$`Mauchly's Test for Sphericity`
+           Effect         W           p p<.05
+3           phase 0.4589302 0.002904689     *
+4 Margarine:phase 0.4589302 0.002904689     *
+
+$`Sphericity Corrections`
+           Effect       GGe        p[GG] p[GG]<.05       HFe        p[HF]
+3           phase 0.6488999 4.701151e-14         * 0.6822991 1.141823e-14
+4 Margarine:phase 0.6488999 3.214191e-02         * 0.6822991 2.994166e-02
+
+Here we see that margarine type is still significant, but less so, going from p = 0.0153 to p = 0.0299 after correction.
+
+C.) Finally, running the MANOVA:
+Term: chol_wide$Margarine:trialfactor 
+
+ Response transformation matrix:
+     trialfactor1 trialfactor2
+[1,]            1            0
+[2,]            0            1
+[3,]           -1           -1
+
+Sum of squares and products for the hypothesis:
+             trialfactor1 trialfactor2
+trialfactor1  0.121688889  0.002466667
+trialfactor2  0.002466667  0.000050000
+
+Multivariate Tests: chol_wide$Margarine:trialfactor
+                 Df test stat approx F num Df den Df   Pr(>F)  
+Pillai            1 0.2856450 2.998982      2     15 0.080233 .
+Wilks             1 0.7143550 2.998982      2     15 0.080233 .
+Hotelling-Lawley  1 0.3998642 2.998982      2     15 0.080233 .
+Roy               1 0.3998642 2.998982      2     15 0.080233 .
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+After using the multivariate approach, the significance level of group is now at p = 0.0802, suggesting that there is no significant difference between the two types of Margarine. 
