@@ -1,0 +1,131 @@
+1. Using the data from the perceptual learning experiment (percep_learn.csv) and from the Margarine study, carry out a gls analyses: (treating ‘trial’ and ‘time’ as factors.). Then treat ‘trial’ and ‘time’ as continuous variables and conduct a linear mixed models
+
+
+
+Perceptual Learning
+
+From the boxplot it looks like group 2 has a slightly higher mean, but the groups overlap quite a bit. 
+
+Variances:
+first	117.1897	124.0760	144.3928	147.6285	162.0356
+second	124.0760	163.0728	177.0892	188.1365	204.3215
+third	144.3928	177.0892	213.8591	222.2422	242.6455
+fourth	147.6285	188.1365	222.2422	247.0218	264.0326
+fifth	162.0356	204.3215	242.6455	264.0326	305.9445
+
+Correlations:
+first	1.0000000	0.8975369	0.9120883	0.8676765	0.8557451
+second	0.8975369	1.0000000	0.9482815	0.9373775	0.9147489
+third	0.9120883	0.9482815	1.0000000	0.9669301	0.9486087
+fourth	0.8676765	0.9373775	0.9669301	1.0000000	0.9604365
+fifth	0.8557451	0.9147489	0.9486087	0.9604365	1.0000000
+
+When examining the variance/covariance structures, it looks like the variances within each group are quite different, ranging from 117-305. Further, the covariances as correlations look to be somewhat different (ranging from .85 to .96), but I don't see an obvious pattern, so we may have to model them with an AR1 model or individually.
+
+When fitting a gls with trial as a factor and assuming compound symmetry, we get
+      AIC      BIC   logLik
+  794.7379 828.1878 -385.369
+  
+When fitting with trial as a factor and using an AR1 model, we get a slightly reduced AIC of 771.5843.
+
+Finally, when fitting with trial as a factor and individually modeling the covariances we get an AIC of 781.5200, which is slightly worse than the AR1 model. So the AR1 model is the best fitting of these 3.
+
+
+Then, I modeled this data using a linear mixed model with random intercepts and slopes. This gave 
+     AIC      BIC   logLik deviance df.resid 
+   797.9    820.2   -391.0    781.9      112 
+   
+which actually had a higher AIC (but a lower BIC). In this model group was not significant (p=0.3), but there was a significant trial * group interaction that was significant (p=0.009). The ar1 model using trial as a factor also showed a non significant group main effect and significant group * trial interactions for all trials.
+
+
+
+
+Margarine
+In these data I noticed that cholesterol measurements seemed to be approximately normally distributed and that they seemed to be slightly higher for the baseline group than either of the follow ups, but this may have been a small difference. There seemed to be a small difference between groups overall as well with group B having a slightly higher average than group A.
+
+Variances
+Before	1.418689	1.328204	1.300515
+After4weeks	1.328204	1.261921	1.235584
+After8weeks	1.300515	1.235584	1.214210
+
+The variances within groups seem to be about the same with the Before group being higher by about 0.2.
+
+Covariance as correlation
+Before	1.0000000	0.9926706	0.9908885
+After4weeks	0.9926706	1.0000000	0.9981812
+After8weeks	0.9908885	0.9981812	1.0000000
+
+The covariances are all 0.99, so we may be able to model them all together.
+
+Modeling the data with phase as a factor we get:
+       AIC      BIC    logLik
+  14.40454 30.31641 0.7977303
+  
+Then using the AR1 model of covariance we get:
+       AIC      BIC   logLik
+  7.451311 23.36318 4.274345
+  
+Finally, modeling all covariances individually we get:
+       AIC      BIC   logLik
+  4.476541 24.36638 7.761729
+  
+This model has the lowest AIC of these three models, so this is the one I would use if modeling phase as a factor.
+
+Then I modeled the data using phase as a continuous variable and found:
+
+Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite's
+  method [lmerModLmerTest]
+Formula: measurement ~ as.numeric(phase) * Margarine + (1 | ID)
+   Data: chol_long
+
+     AIC      BIC   logLik deviance df.resid 
+    59.6     71.6    -23.8     47.6       48 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.7830 -0.8329  0.1077  0.7028  1.3947 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ ID       (Intercept) 1.10897  1.0531  
+ Residual             0.02903  0.1704  
+Number of obs: 54, groups:  ID, 18
+
+Fixed effects:
+                             Estimate Std. Error       df t value Pr(>|t|)    
+(Intercept)                   6.23815    0.36159 19.89011  17.252 1.97e-13 ***
+as.numeric(phase)            -0.27333    0.04016 36.00000  -6.806 5.90e-08 ***
+MargarineB                    0.80037    0.51136 19.89011   1.565    0.133    
+as.numeric(phase):MargarineB -0.08222    0.05679 36.00000  -1.448    0.156    
+
+
+From this, the AIC is quite a bit higher than any of the models using phase as a factor. Neither model (phase as factor or numeric) found margarine to have a significant main effect. However, the linear mixed model also found there to be no significant interaction between phase and margarine, which the model treating phase as factor found significant. 
+
+
+
+
+2.I received the following letter from a medical doctor in Neurology asking me for my blessing What would you tell the doc?
+
+
+Thus, question #1: is this assumption correct? 
+I have a few concerns about aggregating "got better" and "got worse" in this way because it contains no information on the severity of the depression both before and after surgery. I would want to control for this because patients who are very mildly depressed before surgery may show slight behavior change due to the act of having surgery (which is a very strong placebo) and may see treatment general effects. This also would require the parents to have accurate perceptions of how depressed their children are behaving, which I'm skeptical of. Further, this is no information here about the time between depression scores and surgery (both pre and post), and there may very well be some interaction with patients feeling hopeful right before surgery and relieved right after surgery, but this effect may decay. Basically, depression is a continuum, and this test treats it as a factor with 2 levels, while ignoring important other interactions such as with time, so I don't think assumptions about this data are all valid. Lastly, there is no control group to compare how many patients might improve spontaneously. Given all of these issues, I'm not sure there's a better way to test for significance than the chi-square here that I would trust.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
