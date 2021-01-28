@@ -1,0 +1,122 @@
+1. Continue working on Problem 1b by playing with the functional nature of time. Can’t ever have enough margarine.
+
+Looking at covariance structures and previous models
+Before	After4weeks	After8weeks
+Before	1.418689	1.328204	1.300515
+After4weeks	1.328204	1.261921	1.235584
+After8weeks	1.300515	1.235584	1.214210
+
+
+	Before	After4weeks	After8weeks
+Before	1.0000000	0.9926706	0.9908885
+After4weeks	0.9926706	1.0000000	0.9981812
+After8weeks	0.9908885	0.9981812	1.0000000
+
+Figures 1-5 show approximately equal means and variances across time. Figure 4 shows that there may be some exponential decay, so I'm going to transform the data to reflect that and re-run the model, comparing it to the best model from last time.
+
+From last time:
+Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite's
+  method [lmerModLmerTest]
+Formula: measurement ~ as.numeric(phase) * Margarine + (1 | ID)
+   Data: chol_long
+
+     AIC      BIC   logLik deviance df.resid 
+    59.6     71.6    -23.8     47.6       48 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-1.7830 -0.8329  0.1077  0.7028  1.3947 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ ID       (Intercept) 1.10897  1.0531  
+ Residual             0.02903  0.1704  
+Number of obs: 54, groups:  ID, 18
+
+Fixed effects:
+                             Estimate Std. Error       df t value Pr(>|t|)    
+(Intercept)                   6.23815    0.36159 19.89011  17.252 1.97e-13 ***
+as.numeric(phase)            -0.27333    0.04016 36.00000  -6.806 5.90e-08 ***
+MargarineB                    0.80037    0.51136 19.89011   1.565    0.133    
+as.numeric(phase):MargarineB -0.08222    0.05679 36.00000  -1.448    0.156    
+
+
+New model:
+Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite's
+  method [lmerModLmerTest]
+Formula: measurement ~ phase * Margarine + (1 + phase | ID)
+   Data: chol_long
+
+     AIC      BIC   logLik deviance df.resid 
+    33.0     48.9     -8.5     17.0       46 
+
+Scaled residuals: 
+     Min       1Q   Median       3Q      Max 
+-1.92404 -0.73593 -0.05166  0.81892  1.48072 
+
+Random effects:
+ Groups   Name        Variance Std.Dev. Corr 
+ ID       (Intercept) 1.34130  1.1581        
+          phase       0.03303  0.1817   -1.00
+ Residual             0.01240  0.1114        
+Number of obs: 54, groups:  ID, 18
+
+Fixed effects:
+                 Estimate Std. Error      df t value Pr(>|t|)    
+(Intercept)        6.6176     0.3955 18.0176  16.734 2.01e-12 ***
+phase             -1.6431     0.1592 28.3658 -10.318 4.15e-11 ***
+MargarineB         0.9202     0.5593 18.0176   1.645   0.1172    
+phase:MargarineB  -0.5044     0.2252 28.3658  -2.240   0.0331 *  
+
+
+
+
+This shows that the AIC went from 59.6 before accounting for exponential decay to 33.0 after the data transform. This is substantially better at fitting the data given the same parameters. Further, this better model finds a significant interaction between phase and Margarine group.
+
+
+
+
+
+2. Enclosed are the birth weights of newborn rats. Mothers were given a drug that was expected to reduce the weight of the litter. There were three conditions: a control (placebo), a low dose of the drug, or a high dose of the drugs. Generally, female pups are lighter than male pups. Was the drug effective? Data are in the file “birthweight.csv”. Be a bit cautious – this problem has an element that’s a bit different from ones we have dealt with typically but I believe you can handle it.
+
+Figures 6-7 show that there may be some differences in weight between litter size and treatment. It looks like the mean weights aren't obviously significantly different between treatment, sex, or litter size, although it does look like weight may decrease with litter size. The mean weights also appear to approximately normally distributed.
+
+
+Further, it looks like the variances change substantially between control, high, and low, so it seems like a better idea to run a linear regression with contrasts instead of an anova. There is also a pretty big difference in the size of the groups, with the high group only have about half the samples of the control and low groups. However, There are still 65 observations for that group, so hopefully it's ok.
+
+Call:
+lm(formula = weight ~ Treatment + as.factor(sex) + Litter + as.numeric(Lsize), 
+    data = rat)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-3.15236 -0.27283 -0.00683  0.32429  1.50556 
+
+Coefficients:
+                   Estimate Std. Error t value Pr(>|t|)    
+(Intercept)         7.35092    0.19533  37.633  < 2e-16 ***
+Treatment.L        -0.38107    0.08529  -4.468 1.10e-05 ***
+Treatment.Q         0.69359    0.13185   5.261 2.65e-07 ***
+as.factor(sex)Male  0.28039    0.05661   4.953 1.19e-06 ***
+Litter              0.01152    0.01041   1.107    0.269    
+as.numeric(Lsize)  -0.12670    0.01033 -12.265  < 2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+
+From this model it appears that there are both significant linear and quadratic effects of treatment on weight. This also shows that weights are significantly different by sex and litter size. However, litter was not significant.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
