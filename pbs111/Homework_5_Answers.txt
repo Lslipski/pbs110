@@ -1,0 +1,138 @@
+1. Holly Taylor had subjects from each class at Tufts (first-year, sophomores, etc. 1-4) place 8 landmarks on a campus map. See if class mattered. Data in "holly_map_data.csv", please use DB as dependent variable.
+
+From image 1, it looks like there's a trend downward in DB as year increases.
+
+From image 2, DB seems to be pretty normally distributed about zero. I wonder if this data was already z-scored.
+
+To model this effect, I started with random intercepts per participant while examining the main effects of year and landmark as fixed effects.
+
+Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite's
+  method [lmerModLmerTest]
+Formula: DB ~ year + landmark + (1 | pnum)
+   Data: map
+
+     AIC      BIC   logLik deviance df.resid 
+ -1366.8  -1345.1    688.4  -1376.8      555 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-2.8534 -0.5997 -0.0013  0.5524  3.9014 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ pnum     (Intercept) 0.002538 0.05038 
+ Residual             0.003998 0.06323 
+Number of obs: 560, groups:  pnum, 70
+
+Fixed effects:
+              Estimate Std. Error         df t value Pr(>|t|)   
+(Intercept)   0.053751   0.017145  85.087728   3.135  0.00236 **
+year         -0.018653   0.006113  69.999999  -3.051  0.00322 **
+landmark      0.001098   0.001166 490.000000   0.942  0.34686  
+
+
+This showed a significant effect of year, but a non-significant effect of landmark. While I think it's reasonable to keep year as a fixed effect (because we have all the possible options included here), I would want my effects to be able to generalize to other landmarks on campus (random items effect), so I'm going to allow for random intercepts for landmark as well.
+
+Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite's
+  method [lmerModLmerTest]
+Formula: DB ~ year + landmark + (1 | pnum) + (1 | landmark)
+   Data: map
+
+     AIC      BIC   logLik deviance df.resid 
+ -1496.2  -1470.2    754.1  -1508.2      554 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-2.5411 -0.5848 -0.0359  0.4726  4.9677 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ pnum     (Intercept) 0.002706 0.05202 
+ landmark (Intercept) 0.000978 0.03127 
+ Residual             0.002908 0.05393 
+Number of obs: 560, groups:  pnum, 70; landmark, 8
+
+Fixed effects:
+             Estimate Std. Error        df t value Pr(>|t|)   
+(Intercept)  0.053751   0.029717 15.787814   1.809  0.08957 . 
+year        -0.018653   0.006146 69.453118  -3.035  0.00338 **
+landmark     0.001098   0.004927  7.945216   0.223  0.82927
+
+This also shows a highly significant effect of year, is in line with my hypotheses about the variables, and further reduces the AIC. So this is the model I will accept as best. Since it shows a significant effect on year, I would report that effect.
+
+
+For fun I added in random intercept per year, which was a singular solution. I also allowed for random slopes of subjects within landmarks, but this also produced singular solutions, so I did not use these models.
+
+
+
+
+2. I’ve enclosed a dataset from Jesse (recent grad student). Subjects view a display to see if a target is present. The DV is reaction time. Set size is the number of items in the display. There are three different displays and identity codes which display was present. There are also two orientations: normal (1) and inverted (2). Presence codes whether the target was present (1 = present). People usually analyze present trials separately from absent trials. Is the set size effect different for upright versus inverted items? Data are in “jesse_search_data”. You may restrict yourself to the present condition if you like.
+
+
+From image 3 we see that rt seems to incrase slightly with incrasing set size. 
+
+From image 4 we see that rt is not normally distributed, and appears to have a sort of exponential decay, so I transformed my data to account for this. The distribution looks a bit more normal afterwards (image 5).
+
+To model the interaction of set size on orientation I first ran a model with random intercepts for subject and identity along with the interaction term of set size with orientation.
+
+Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite's
+  method [lmerModLmerTest]
+Formula: rt ~ set_size * orientation + (1 | sub) + (1 | identity)
+   Data: rt_present
+
+     AIC      BIC   logLik deviance df.resid 
+  -690.8   -668.4    352.4   -704.8      173 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-4.9093 -0.3783  0.0926  0.5452  2.7948 
+
+Random effects:
+ Groups   Name        Variance  Std.Dev.
+ sub      (Intercept) 1.303e-03 0.036101
+ identity (Intercept) 4.366e-05 0.006608
+ Residual             9.604e-04 0.030990
+Number of obs: 180, groups:  sub, 10; identity, 3
+
+Fixed effects:
+                       Estimate Std. Error         df t value Pr(>|t|)    
+(Intercept)            0.600058   0.022768  94.946574  26.356   <2e-16 ***
+set_size               0.003210   0.004473 167.927596   0.718    0.474    
+orientation            0.006089   0.012223 167.927596   0.498    0.619    
+set_size:orientation  -0.006591   0.002829 167.927596  -2.330    0.021 * 
+
+This showed a significant effect of the interaction between set_size and orientation.
+
+I also reasoned that maybe the slope of orientation might be different within subjects, so I added random slopes for orientation to the model within subject
+
+Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite's
+  method [lmerModLmerTest]
+Formula: rt ~ set_size * orientation + (1 + identity | sub) + (1 | identity)
+   Data: rt_present
+
+     AIC      BIC   logLik deviance df.resid 
+  -704.3   -675.6    361.2   -722.3      171 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-5.2659 -0.4973  0.0142  0.5372  2.5728 
+
+Random effects:
+ Groups   Name        Variance  Std.Dev. Corr 
+ sub      (Intercept) 3.547e-03 0.059560      
+          identity    2.135e-04 0.014611 -0.88
+ identity (Intercept) 3.974e-05 0.006304      
+ Residual             8.162e-04 0.028569      
+Number of obs: 180, groups:  sub, 10; identity, 3
+
+Fixed effects:
+                       Estimate Std. Error         df t value Pr(>|t|)    
+(Intercept)            0.603435   0.020935  87.672941  28.824   <2e-16 ***
+set_size               0.003210   0.004124 158.705746   0.779   0.4374    
+orientation            0.006089   0.011268 158.705747   0.540   0.5897    
+set_size:orientation  -0.006591   0.002608 158.705746  -2.527   0.0125 * 
+
+
+This model also found a significant effect of the interaction term. However, I don't have a strong hypothesis on why the slopes would be different for orientation within each individual. Further, the AIC increased after adding this term. So I'm going to remove this term and stick with my first model.
+
+I also considered allowing for random intercepts of orientation, but this made the solution singular, so I did not include it. Overall, I would report that there is a significant (p=0.021) difference of the effect of set size on rt depending on orientation.
