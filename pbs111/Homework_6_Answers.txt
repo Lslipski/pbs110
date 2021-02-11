@@ -1,0 +1,170 @@
+1. 1. Redo Problem 2 (Jesse) from last week using glmer. You already have the datafile.
+
+hw6_img1.png shows again that the reaction times in this data are positively skewed. In the previous homework I transformed this variable to make it more linear. However, this is an issue because raw time is the variable of interest here, the effect I'm interested in may not exist in the transformed data. However, because reaction time is not normally distributed, the assumptions of the regular lmer do not hold. 
+
+From the lmer alone we see:
+Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite's
+  method [lmerModLmerTest]
+Formula: rt ~ scale(set_size) * orientation + (1 | sub) + (1 | identity)
+   Data: rt_present
+
+     AIC      BIC   logLik deviance df.resid 
+  -436.6   -414.2    225.3   -450.6      173 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-2.8016 -0.4860 -0.0946  0.3630  6.2063 
+
+Random effects:
+ Groups   Name        Variance  Std.Dev.
+ sub      (Intercept) 0.0045432 0.06740 
+ identity (Intercept) 0.0001708 0.01307 
+ Residual             0.0039806 0.06309 
+Number of obs: 180, groups:  sub, 10; identity, 3
+
+Fixed effects:
+                              Estimate Std. Error         df t value Pr(>|t|)
+(Intercept)                   0.485067   0.027063  20.543000  17.924 5.13e-14
+scale(set_size)              -0.011460   0.014912 167.914849  -0.768   0.4433
+orientation                   0.039829   0.009405 167.914849   4.235 3.76e-05
+scale(set_size):orientation   0.020967   0.009431 167.914849   2.223   0.0275
+
+There are no significant effects, including that of the set_size*orientation interaction of interest.
+
+However, when I run a basic glmer with random subjects, I find that the intercetps, orientation, and the set_size*orientation interaction is significant, all with a reduced AIC. 
+
+Generalized linear mixed model fit by maximum likelihood (Laplace
+  Approximation) [glmerMod]
+ Family: Gamma  ( log )
+Formula: rt ~ scale(set_size) * orientation + (1 | sub)
+   Data: rt_present
+
+     AIC      BIC   logLik deviance df.resid 
+  -530.4   -511.3    271.2   -542.4      174 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-2.2660 -0.5214 -0.1221  0.3941  5.1726 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ sub      (Intercept) 0.004036 0.06353 
+ Residual             0.010985 0.10481 
+Number of obs: 180, groups:  sub, 10
+
+Fixed effects:
+                            Estimate Std. Error t value Pr(>|z|)    
+(Intercept)                 -0.71419    0.05568 -12.826  < 2e-16 ***
+scale(set_size)             -0.01698    0.02213  -0.767   0.4428    
+orientation                  0.06457    0.01396   4.626 3.74e-06 ***
+scale(set_size):orientation  0.03471    0.01399   2.481   0.0131 *  
+
+My notebook shows output for other models, but in the end the model with the lowest AIC was this one:
+Generalized linear mixed model fit by maximum likelihood (Laplace
+  Approximation) [glmerMod]
+ Family: Gamma  ( log )
+Formula: rt ~ scale(set_size) * orientation + (1 + orientation | sub) +  
+    (1 + orientation | identity)
+   Data: rt_present
+
+     AIC      BIC   logLik deviance df.resid 
+  -581.1   -546.0    301.5   -603.1      169 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.2197 -0.4692 -0.0576  0.4310  4.2114 
+
+Random effects:
+ Groups   Name        Variance Std.Dev. Corr 
+ sub      (Intercept) 0.008831 0.09398       
+          orientation 0.004246 0.06516  -0.81
+ identity (Intercept) 0.002078 0.04558       
+          orientation 0.001214 0.03484  -0.96
+ Residual             0.007473 0.08645       
+Number of obs: 180, groups:  sub, 10; identity, 3
+
+Fixed effects:
+                            Estimate Std. Error t value Pr(>|z|)    
+(Intercept)                 -0.71357    0.08494  -8.401  < 2e-16 ***
+scale(set_size)             -0.01553    0.01776  -0.874  0.38187    
+orientation                  0.06206    0.07260   0.855  0.39263    
+scale(set_size):orientation  0.03339    0.01123   2.972  0.00295 ** 
+
+When subject and identity are allowed to have random intercepts and slopes within orientation, this model provided an even lower AIC, and still showed a highly significant (p = 0.00295) interaction of set_size and orientation. It also uses a gamma distribution to model the positively skewed rt DV, allowing us to keep rt in raw time units while also not assuming a normal distribution.
+
+
+
+
+
+2. A former grad student ran a study here (well after graduating) on eye-movements as a predictor of face familiarity. Here are two eye-movement parameters: probability of a leftward movement and the number of clusters. Were those two predictor variables, or IVs, significantly related to familiarity? (Data in frank_trial_data)
+
+
+For this problem I wanted to use PLeft and NumClus as independent variables predicting which class, familiar or unfamiliar, a given stimulus was in. Just to have a look, I first treated Class as numeric and ran a simple lmer on the data:
+
+Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite's
+  method [lmerModLmerTest]
+Formula: as.numeric(Class) ~ Pleft * NumClus + (1 | subj_id)
+   Data: eye
+
+     AIC      BIC   logLik deviance df.resid 
+   185.0    203.1    -86.5    173.0      144 
+
+Scaled residuals: 
+     Min       1Q   Median       3Q      Max 
+-2.00264 -0.86206  0.00189  0.72870  2.01853 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ subj_id  (Intercept) 0.008417 0.09174 
+ Residual             0.180583 0.42495 
+Number of obs: 150, groups:  subj_id, 4
+
+Fixed effects:
+                Estimate Std. Error         df t value Pr(>|t|)    
+(Intercept)     1.843266   0.283455 145.137877   6.503 1.19e-09 ***
+Pleft           0.571737   0.405032 146.353704   1.412   0.1602    
+NumClus        -0.123000   0.051927 148.545724  -2.369   0.0191 *  
+Pleft:NumClus  -0.008913   0.075831 146.313823  -0.118   0.9066  
+
+This showed a a signifcant effect of the number of clusters. However, Class is not a normally distributed continuous variable. Instead, I wanted to treat it as binary variable. To accomplish this I ran a logistic regression using glmer with a binomial distribution and a logit link function.
+
+Generalized linear mixed model fit by maximum likelihood (Laplace
+  Approximation) [glmerMod]
+ Family: binomial  ( logit )
+Formula: Class ~ Pleft * NumClus + (1 | subj_id)
+   Data: eye
+
+     AIC      BIC   logLik deviance df.resid 
+   174.5    189.6    -82.3    164.5      145 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-2.5068 -0.6988  0.2570  0.6154  2.6321 
+
+Random effects:
+ Groups  Name        Variance Std.Dev.
+ subj_id (Intercept) 0.1991   0.4462  
+Number of obs: 150, groups:  subj_id, 4
+
+Fixed effects:
+               Estimate Std. Error z value Pr(>|z|)  
+(Intercept)    1.953994   1.831276   1.067   0.2860  
+Pleft          2.697535   2.674459   1.009   0.3132  
+NumClus       -0.674090   0.366469  -1.839   0.0659 .
+Pleft:NumClus  0.008076   0.518478   0.016   0.9876  
+
+This model showed non-significant effects of both the number of clusters and the probability of leftward movement. Since both models used the same parameters but the glmer had a much lower AIC, I would use this model as my final model and report no significant effects of these 2 predictor variables. 
+
+I don't know much about the hypotheses of this experiment, but I would have been surprised if these 2 simple variables were able to accurately capture the process of facial recognition. 
+
+
+
+
+
+
+
+
+
+
+
+
