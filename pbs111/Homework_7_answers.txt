@@ -1,0 +1,21 @@
+1.
+
+The original data set included 15 variables. I split this data about evenly into a training set and a testing set. Using the training set I created a logistic regression model that used all variables to model the alcabuse DV of interest (just to see beta values for all of the variables). Then, to reduce the number of predictor variables, I used the training data and stepwise logistic regression to model alcabuse. This gave me a reduced model with only 6 predictor variables. Then, I took both the full and stepwise models and applied them to the testing dataset, which they had never seen before. This gave me a prediction of alcabuse for each subject for each model.
+
+The full model with all 15 variables had an accuracy of about 0.29. At the same time, the stepwise model had an accuracy of about 0.24. So with fewer than half of the variables I was able to predict alcohol abuse with about the same accuracy as using all of them. This amounted to a correct prediction in 65 of 107 subjects. This was a fair test because neither model used any of the testing data in its derivation. The ROC for this stepwise model can be seen in HW7_img1.png, and its area under the curve was 0.76.
+
+
+2.
+
+
+I ran a principal components analysis on this data to determine if a factor analysis would support the six subscales in this resiliancy survey. To do this I ran a PCA with 6 principal components and then used the varimax rotation to make the original variables load maximally on these components.
+
+From the scree plot it appears that there may be many more important components than just 6, with 12 PCs having eigenvalues greater than 1 (HW7_img6). Despite this, I proceeded with 6 PCs and visualized the factor loadings in 3 ways.
+
+In the heat map of factor loadings (HW7_img3), it looks like factors 1, 3, and 5 have loadings that tend to cluster pretty strongly with family strengths, social skills, and involvement respectively. However, it looks like factors 2, 4, and 6 have strong loadings across a number of the original variables that do not belong to the same subscales.
+
+This was corroborated in HW7_img4 and HW7_img5 as well. In HW7_img5 we can see that actually some of the strongest loadings are between factor 6 and Q15,Q17, and Q35, which correspond to both family strengths and social supports. This is similar to factor 4 that loads strongly on Q14,Q16, and Q34. I'm not confident that family strength and social supports may be related, but it seems plausible that a factor loading on one may load on another.
+
+Taken these findings together, I think the factor analysis revealed that 6 principal components do correspond somewhat strongly with the 6 subscales used in the survey. Further, these 6 components explain quite a bit (0.43) of the total variance in the dataset.
+
+The subscales are as follows: Involvement Q1-6 Social skills Q7-12 Family strengths Q13-23 School strengths Q24-29 Social supports Q30-37 Positive Outlooks Q38-43
