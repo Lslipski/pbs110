@@ -1,0 +1,23 @@
+In 1 dimension (hw8_img1) there seems to be anywhere from 4 to 9 or 10 clusters, but it isn't obvious where the cutoffs should be. Let's look with 2 dimensions.
+
+
+
+An additional dimension makes things a bit more clear (hw8_img2). There seems to be some natural clusters forming in 2 dimensions. Since MDS is better at capturing larger distances, this gives us a rough 5 or 6 clusters starting to form, but it isn't clear where some pictures belong.
+
+8, 6, 7, and 12 all have people in them and have higher negative values along dimension 1, whereas 9, 5, 10, and 11 all have buildings in them and have higher positive values. In the middle, pictures 13, 14, and 4 all have pictures of animals. So it seems dimension 1 is capturing some type of animacy.
+
+It still isn't clear to me what dimension 2 represents, with 13 and 14 both having animals (high negative dimesion 2 values) and 15 and 16 having pictures of plants. Maybe it has something to do with reds/browns vs blues/greens.
+
+
+
+(hw8_img3) From this stress plot, it seems that the stress asymptotes around 0 with 6 dimensions, and 5 dimensions gets stress pretty close to 0 as well. So 5 or 6 dimensions probably does a good job of clustering the distances.
+
+
+From hw8_img4, plotting dimensions 1 and 3, it seems 15 and 16 occupy an identical space along dimensions 1 and 3. We'll see if these separate using more dimensions.
+
+Next I used Ward Hierarchical Clustering (hw8_img5). When forced to create 6 clusters, 2 and 9 end up in separate clusters, despite both being houses. Meanwhile, 15 and 16 seem to occupy a very similar if not identical space.
+
+
+Finally, I used Ward Hierarchical Clustering with bootstrapped p-values (hw8_img6). From this it looks like there are 5 significant clusters, which roughly correspond to clusters from our lower-dimensional visualizations. From left to right these seem to correspond to people (although 8 is maybe a bit more abstract), non-human animals, seascapes, plants, and houses. These results seem pretty reasonable, and these clusters were re-discovered from the behavioral ratings of only 17 participants!
+
+Finally, I added color and circlized the dendogram just to see if it would show anything different. It kind of just looks cooler (hw8_img7).
