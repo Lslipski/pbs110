@@ -357,6 +357,45 @@ To test response time, I used a glmer to test for main effects of category, self
 
 3. Andrea Robinson has been conducting research on the effect of exercise on ADHD (attention deficit hyperactivity disorder). The hypothesis is that regular exercise might ameliorate some of the deficits associated with ADHD. She and her colleagues ran an experiment with three types of rats: WKY rats are normal controls (who weren’t given exercise opportunities); SHR.NX rats who were genetically modified to exhibit ADHD (and who weren’t given exercise); and SHR.X rats who were the genetically modified strain but were given exercise prior to each test. The task was to learn a conditioned association between light and food. Each rat was run for 10 days, bigger numbers indicate better learning. The hypotheses were that the ADHD rats would show worse learning than controls but exercise would reduce or eliminate the difference. Finally, the female altered rats typically exhibit stronger symptoms than the male rats. Evaluate the various hypotheses. The data are in ‘adhd_for_class.csv’
 
+Hypotheses: (1) There is a significant main effect of Group on learning such that SHR rats show worse learning than WKY rats. (2) The SHR.X rats show significantly better learning than the SHR.NX rats. 
+
+I will use 2 planned contrasts here to check for these effects. (1) will be WKY rats vs. SHR rats. (2) will be a contrast of SHR.NX rats vs. SHR.X rats. 
+
+First, I looked at the pairwise correlation matrix for all time points included in the data to look for any temporal autocorrelation structure. I did not see any obvious systematic autocorrelation. I then fit a basic lmer with random intercepts for subjects. I used this to take a look at autocorrelation (final_q3_img2) and distribution of residuals (final_q3_img3). No obvious autocorrelation (eg AR1) was present, so I will not try to correct for that using gls. The residuals were also normal looking, so I won't use a glmer to model learning. I then plotted learning values (final_q3_img1) against time points, and I found that some participants do vary in their slopes for each time point, so I will allow for random slopes for each time point within subject in my model. 
+
+To fit my final model I included random slopes for time within subjects. This model showed the following:
+
+Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite's
+  method [lmerModLmerTest]
+Formula: learning ~ time * Group + (1 + time | subject)
+   Data: rats_long
+
+     AIC      BIC   logLik deviance df.resid 
+  1341.8   1383.6   -660.9   1321.8      470 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.8125 -0.6509 -0.0475  0.5677  2.3428 
+
+Random effects:
+ Groups   Name        Variance Std.Dev. Corr 
+ subject  (Intercept) 0.26278  0.5126        
+          time        0.02843  0.1686   -0.60
+ Residual             0.67695  0.8228        
+Number of obs: 480, groups:  subject, 48
+
+Fixed effects:
+                       Estimate Std. Error       df t value Pr(>|t|)    
+(Intercept)             0.34690    0.10980 47.99960   3.159  0.00274 ** 
+time                    0.37202    0.02763 47.99946  13.466  < 2e-16 ***
+Groupwky_v_shr          0.94153    0.31056 47.99960   3.032  0.00391 ** 
+Groupshrnx_v_shrx       0.17632    0.26895 47.99960   0.656  0.51522    
+time:Groupwky_v_shr     0.01719    0.07814 47.99946   0.220  0.82684    
+time:Groupshrnx_v_shrx -0.10782    0.06767 47.99946  -1.593  0.11764    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+From this model, it seems that there is significant main effect of the first planned contrast of interest on learning. There seems to be a significant difference between WKY rats and SHR rats in learning, providing evidence for hypothesis 1. However, The second planned contrast of interest, SHR.NX vs. SHR.X, was not significant in this model, suggesting that exercise did not significantly effect learning in rats with ADHD. Finally, time had a significant effect on learning, as expected when rats learn over multiple sessions.
 
 
 
@@ -369,6 +408,17 @@ To test response time, I used a glmer to test for main effects of category, self
 
 
 
+
+
+
+4. The behavioral paradigm is called "positive patterning" such that 3 sensory stimuli were presented in intermixed trials during each conditioning session. The 3 sensory stimuli were "L" for a flashing light, "C" for a clicking sound, and "CL" for a simultaneous presentation of the flashing light and click. What makes this an interesting study is that the click (C) and the light (L) stimuli were nonreinforced (meaning the subjects did not get a food reward after the stimuli presentation terminated). However, the compound presentation (CL) was reinforced (subjects received 2 grain pellets as a reward). What I measured was food cup or "magazine" entries, which was the time spent in the food cup during the cue presentations (i.e. while the flashing light was occurring how much time did the rat spent with its head in the food cup waiting for the food to drop). Training occurred over 16 days (see column "session"). What we had hoped to see was that intact rats should spend more time in the food cup during the compound presentation than the individual stimuli, because the compound was reinforced.
+
+Intact "sham" rats are group "0" and lesioned rats are group "1".
+
+Lesioned rats are rats that received pre-training lesions of the retrosplenial cortex (RSC). Our working hypothesis was that if the RSC was important for the integration of sensory cues, RSC lesioned animals would be impaired, thus respond similarly to all three types of cues, unlike intact rats. The data are in ‘entries_reshaped.csv’.
+
+
+Hypothesis: RSC lesioned animals would not respond differently to all three types of cues, but intact rats would respond most strongly to the compound presentation. This is to say that there is a significant main effect of group on score, there is a significant main effect of stimulus on score, and that there is a significant interaction effect of group and stimulus on score.
 
 
 
