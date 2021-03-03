@@ -1,0 +1,389 @@
+1.) I enclosed a file labeled “psych_rank.csv”. It contains the data from a Chronicle of Higher Education rating of top departments in a number of fields. We, of course, were in the top 10. I deleted one derived score to avoid confusion. The far left column is the department’s rank, note that two schools are tied for 10th. Develop a model to explain or predict the ranking. Are there interesting relationships among the variables or schools? Do the Ivy League schools differ from the others? It’s not correct but treat the ranks as a continuous variable. There might be a number of different analyses that would help us understand these data.
+
+
+
+This data has only 11 observations and 15 variables, so the matrix is underdetermined. To converge on a solution, we will need to reduce the number of variables. Many of these are likely highly colinear because there are multiple measurements of publishing books and journals, getting citations, getting new grants and receiving awards. For a first pass, I'll look at the correlation matrix to decide on a subset of predictor variables. Then I'll try something smarter.
+
+From the correlation matrix I saw a few things. (1) the number of faculty is not nearly as correlated with rank as all the other predictors. (2) probbook and booksper have a correlation of 0.94, so I will only keep booksper, since it has a slightly better correlation with rank. (3) probjour and jourper are somewhat highly correlated (0.60), and probjour correlates with probcite at 0.97. Meanwhile, jourper correlates with numcites at 0.91. Of these 4 variables I will only keep probcite and numcites, since these 2 are less correlated with each other than are probjour and jourper, but 'represent' all 4 variables in terms of correlation (4) citesper is relatively uncorrelated with other predictors, so I will keep it. (5) Probnewg and newgran are highly correlated, but probnewg is slightly more correlated with rank, so I will only keep it. (6) probawd and awards_p are correlated (0.97) and very similarly correlated with rank, so I will keep the one with slightly stronger rank correlation, which is awards_p. These observations confirm that there is likely high colinearity across these variables, especially among those within the same category (citations).
+
+For my first model I decided to keep: num_fac, booksper, probcite, numcites, citesper, probnewg, awards_p. I'll plan to run this model as is, then run a stepwise AIC to see if more variables can be removed. I will then also run a pca and identify variable loadings on dimensions that explain the most variation in the data. Using those variables I will produce a second model, test with stepAIC, and use whichever model gives me the lowest AIC.
+
+Here are the results from my first model using dat_rank, rank, num_fac, booksper, probcite, numcites, citesper, probnewg, awards_p:
+
+Call:
+lm(formula = rank ~ ., data = dat_lm)
+
+Residuals:
+      1       2       3       4       5       6       7       8       9      10 
+ 0.4799  0.8097 -1.6259 -0.3334 -1.1031 -0.2421  0.2460 -0.3758 -0.6275  0.9646 
+     11 
+ 1.8075 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)
+(Intercept)  18.26001    9.68935   1.885    0.156
+num_fac      -0.01613    0.03405  -0.474    0.668
+booksper     -6.29266    4.03997  -1.558    0.217
+probcite     -0.11738    0.07895  -1.487    0.234
+numcites      0.09809    0.16796   0.584    0.600
+citesper     -0.64618    1.00801  -0.641    0.567
+probnewg      0.02088    0.07275   0.287    0.793
+awards_p    -50.73958   45.80687  -1.108    0.349
+
+Residual standard error: 1.799 on 3 degrees of freedom
+Multiple R-squared:  0.9038,	Adjusted R-squared:  0.6793 
+F-statistic: 4.026 on 7 and 3 DF,  p-value: 0.1399
+AIC:  47.84364
+
+Note that none of these variables are significant. Here are the results after using stepAIC:
+
+Call:
+lm(formula = rank ~ booksper + probcite + numcites + awards_p, 
+    data = dat_lm1)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.33432 -0.84236 -0.05987  0.56114  2.36457 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)  
+(Intercept)  11.41219    3.35068   3.406   0.0144 *
+booksper     -4.28707    2.40306  -1.784   0.1247  
+probcite     -0.07554    0.04714  -1.603   0.1601  
+numcites      0.09570    0.06573   1.456   0.1956  
+awards_p    -59.69192   22.43410  -2.661   0.0375 *
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 1.409 on 6 degrees of freedom
+Multiple R-squared:  0.8819,	Adjusted R-squared:  0.8032 
+F-statistic: 11.21 on 4 and 6 DF,  p-value: 0.005999
+AIC:  44.09392
+
+The AIC came down slightly, but still only awards_p is significant. I may have done a bad job of choosing variables, so now I will use PCA to choose more intelligently.
+
+After running PCA:
+
+Principal Components Analysis
+Call: principal(r = cormat, nfactors = 7, rotate = "varimax")
+Standardized loadings (pattern matrix) based upon correlation matrix
+           RC1   RC6   RC2   RC3   RC5   RC4   RC7   h2      u2 com
+num_fac  -0.01 -0.26 -0.20 -0.01 -0.94 -0.11 -0.01 0.99 0.00504 1.3
+probbook  0.73  0.10 -0.06  0.48  0.38 -0.22 -0.14 0.99 0.00938 2.7
+booksper  0.77  0.04  0.04  0.53  0.22 -0.23  0.11 0.99 0.01227 2.3
+probjour  0.23  0.95  0.13  0.05  0.16 -0.04 -0.06 1.00 0.00288 1.2
+jourper   0.83  0.36  0.34 -0.10  0.12 -0.12  0.12 0.99 0.00891 1.9
+probcite  0.23  0.92  0.22 -0.07  0.15 -0.12  0.07 0.99 0.00620 1.4
+numcites  0.76  0.31  0.41 -0.17  0.17  0.28  0.10 0.99 0.00758 2.6
+citesper -0.13 -0.13  0.13 -0.14  0.09  0.96  0.00 1.00 0.00065 1.2
+probnewg  0.28  0.35  0.83  0.09  0.25  0.14 -0.10 1.00 0.00185 2.0
+new_gran  0.09  0.13  0.89  0.39  0.07  0.09  0.09 0.99 0.01089 1.5
+grantdol  0.02 -0.06  0.42  0.88 -0.05 -0.13 -0.01 0.98 0.02407 1.5
+probawd   0.97  0.12  0.13  0.07 -0.12 -0.06  0.02 1.00 0.00202 1.1
+awards_p  0.97  0.19  0.01  0.01 -0.08 -0.03 -0.12 0.99 0.00618 1.1
+
+                       RC1  RC6  RC2  RC3  RC5  RC4  RC7
+SS loadings           4.49 2.25 2.10 1.51 1.26 1.19 0.09
+Proportion Var        0.35 0.17 0.16 0.12 0.10 0.09 0.01
+Cumulative Var        0.35 0.52 0.68 0.80 0.89 0.99 0.99
+Proportion Explained  0.35 0.17 0.16 0.12 0.10 0.09 0.01
+Cumulative Proportion 0.35 0.52 0.69 0.80 0.90 0.99 1.00
+
+Mean item complexity =  1.7
+Test of the hypothesis that 7 components are sufficient.
+
+The root mean square of the residuals (RMSR) is  0.01 
+
+Fit based upon off diagonal values = 1
+
+I then plotted the eigenvalues vs. the number of PCs in final_q1_img1.png. The PCA suggests that there are 4 significant components, and that these components together explain 80% of the variance in the data. These load most (equally) heavily on probawd and awards_p, then probjour, then new_gran, and finally grantdol. I'll use these in a second model and compare the AIC to the original.
+
+Here are the results of a new model using dat_rank, rank, probawd, probjour, new_gran, and grantdol:
+
+Call:
+lm(formula = rank ~ probawd + probjour + new_gran + grantdol, 
+    data = dat_lm2)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-1.1591 -0.3617  0.1448  0.4302  0.5913 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  1.858e+01  2.761e+00   6.730 0.000524 ***
+probawd     -6.002e-01  6.593e-02  -9.104 9.87e-05 ***
+probjour    -1.577e-01  3.282e-02  -4.804 0.002988 ** 
+new_gran     4.723e+00  9.204e-01   5.132 0.002153 ** 
+grantdol    -7.911e-06  1.385e-06  -5.712 0.001246 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.758 on 6 degrees of freedom
+Multiple R-squared:  0.9658,	Adjusted R-squared:  0.9431 
+F-statistic: 42.41 on 4 and 6 DF,  p-value: 0.0001554
+AIC:  30.45247
+
+Then I used stepAIC to see if removing any of these variables would improve AIC:
+
+Call:
+lm(formula = rank ~ probawd + probjour + new_gran + grantdol, 
+    data = dat_lm2)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-1.1591 -0.3617  0.1448  0.4302  0.5913 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  1.858e+01  2.761e+00   6.730 0.000524 ***
+probawd     -6.002e-01  6.593e-02  -9.104 9.87e-05 ***
+probjour    -1.577e-01  3.282e-02  -4.804 0.002988 ** 
+new_gran     4.723e+00  9.204e-01   5.132 0.002153 ** 
+grantdol    -7.911e-06  1.385e-06  -5.712 0.001246 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.758 on 6 degrees of freedom
+Multiple R-squared:  0.9658,	Adjusted R-squared:  0.9431 
+F-statistic: 42.41 on 4 and 6 DF,  p-value: 0.0001554
+AIC:  30.45247
+
+Summary: The best model for predicting the rank of institutions was found using PCA to identify 4 principle componenets and the variables on which they most strongly load. This model included probawd, probjour, new_gran, and grantdol and had the lowest AIC of any model attempted by (30.45 vs. 44.09 next best), including one with a greater number of variables chosen based on the correlation matrix of the original data. All 4 variables in this model are significant predictors of rank and stepAIC does not further eliminate any of these variables. Of note, new_gran and grantdol are somewhat highly correlated (~0.6), but both significantly contribute to rank. Overall, it seems the rankings are most heavily based on awards, journal articles, and grants.
+
+
+I will now use this refined model to see how well these variables explain Ivy vs. not. I added a binary variable to the data to specify which schools were ivy league. I was interested to see if this variable would be a good predictor of rank, with the hypothesis being that ivy schools would be ranked higher than non-ivy leagues.
+
+This model resulted in the following:
+
+
+Call:
+lm(formula = rank ~ probawd + probjour + new_gran + grantdol + 
+    ivy, data = dat_lm2)
+
+Residuals:
+       1        2        3        4        5        6        7        8 
+ 0.23580 -0.33595 -0.08116 -0.91737  0.63599 -0.16232  0.36754  0.51160 
+       9       10       11 
+-0.90337  0.40699  0.24226 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  1.692e+01  3.237e+00   5.228 0.003387 ** 
+probawd     -5.889e-01  6.707e-02  -8.780 0.000318 ***
+probjour    -1.413e-01  3.685e-02  -3.834 0.012203 *  
+new_gran     5.175e+00  1.030e+00   5.026 0.004014 ** 
+grantdol    -8.369e-06  1.463e-06  -5.719 0.002285 ** 
+ivy         -6.309e-01  6.391e-01  -0.987 0.368846    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.7596 on 5 degrees of freedom
+Multiple R-squared:  0.9714,	Adjusted R-squared:  0.9428 
+F-statistic: 33.98 on 5 and 5 DF,  p-value: 0.0007278
+AIC:  30.4934
+
+Ivy was not a significant predictor, and the addition of Ivy increased the AIC slightly. Running stepwise AIC produced the following:
+Call:
+lm(formula = rank ~ probawd + probjour + new_gran + grantdol, 
+    data = dat_lm2)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-1.1591 -0.3617  0.1448  0.4302  0.5913 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  1.858e+01  2.761e+00   6.730 0.000524 ***
+probawd     -6.002e-01  6.593e-02  -9.104 9.87e-05 ***
+probjour    -1.577e-01  3.282e-02  -4.804 0.002988 ** 
+new_gran     4.723e+00  9.204e-01   5.132 0.002153 ** 
+grantdol    -7.911e-06  1.385e-06  -5.712 0.001246 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.758 on 6 degrees of freedom
+Multiple R-squared:  0.9658,	Adjusted R-squared:  0.9431 
+F-statistic: 42.41 on 4 and 6 DF,  p-value: 0.0001554
+AIC:  30.45247
+
+Eliminating ivy from the model and leaving me with the original best model.
+
+I then also attempted to predict ivy as a binary dependent variable using the variables from my original model:
+
+Call:
+glm(formula = ivy ~ probawd + probjour + new_gran + grantdol, 
+    family = binomial, data = dat_lm2)
+
+Deviance Residuals: 
+       Min          1Q      Median          3Q         Max  
+-1.395e-05  -4.197e-06  -2.110e-08   3.604e-06   1.469e-05  
+
+Coefficients:
+              Estimate Std. Error z value Pr(>|z|)
+(Intercept) -9.813e+02  1.310e+06  -0.001    0.999
+probawd      1.602e+01  2.445e+04   0.001    0.999
+probjour     7.442e+00  1.037e+04   0.001    0.999
+new_gran     2.384e+02  3.346e+05   0.001    0.999
+grantdol    -1.968e-04  3.305e-01  -0.001    1.000
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 1.5158e+01  on 10  degrees of freedom
+Residual deviance: 7.8265e-10  on  6  degrees of freedom
+AIC: 10
+
+Number of Fisher Scoring iterations: 25
+
+The logistic model did not find any of the most explanatory variables for rank to significantly predict ivy league status. This is somewhat unsurprising given such a small sample and the fact that there seems to be an even distriubtion of ivy leagues and non-ivy leagues in this sample. Further, ivy league is not significantly predicted by rank. 
+
+Call:
+lm(formula = ivy ~ dat_rank$rank)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-0.6144 -0.3946 -0.2297  0.4131  0.7153 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)  
+(Intercept)    0.77928    0.34294   2.272   0.0492 *
+dat_rank$rank -0.05495    0.05165  -1.064   0.3150  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.5188 on 9 degrees of freedom
+Multiple R-squared:  0.1117,	Adjusted R-squared:  0.01305 
+F-statistic: 1.132 on 1 and 9 DF,  p-value: 0.315
+
+However, one additional hypothesis we might have about ivy leagues is that they are so prestigious because they are old, have a lot of money, and are therefore able to hire faculty who bring in even more money. Let's run one more post-hoc test to see if grant dollars can predict ivy league status.
+
+Call:
+lm(formula = ivy ~ grantdol, data = dat_lm2)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-0.5341 -0.4439 -0.4111  0.5409  0.5525 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)
+(Intercept) 3.635e-01  5.368e-01   0.677    0.515
+grantdol    1.278e-07  7.168e-07   0.178    0.862
+
+Residual standard error: 0.5495 on 9 degrees of freedom
+Multiple R-squared:  0.003519,	Adjusted R-squared:  -0.1072 
+F-statistic: 0.03178 on 1 and 9 DF,  p-value: 0.8624
+
+Summary: From this final test I would conclude that there does not seem to be an important role of ivy league vs. not ivy league in determining both school rank and grant dollars. After using PCA to determine the most explanatory variables, 4 variables were found to be significant predictors of rank. However, when ivy status was included in the model, ivy was found not found to be a significant predictor of rank, and stepAIC removed the ivy variables from the model to improve AIC. Further, these 4 variables were not found to significantly predict ivy league status. I would conclude that ivy league status and rank are somewhat independent, assuming that the top 11 schools on this list are representative of the longer list of institutions' ranks.
+
+
+
+
+
+
+
+
+
+
+
+
+
+2.) I briefly analyzed some of Alex daSilva’s data in class but I’ve changed the file and the questions addressed to some extent. During his experiment subjects observed a large number of different stimuli that differed in valence (positive, negative, or neutral) and presence of people (social or nonsocial). After the experiment, subjects were tested on their memory for the stimuli using a yes/no format for answering. A response of ‘1’ indicates a correct answer in the variable “response”. Alex also recorded reaction times in msec (RT). He believed that stimuli that were both negative and social would differ from the other five possible combinations. He measured self-esteem (se) and thought that might exacerbate the distinctiveness of negative social stimuli. I would like you to analyze (in separate analyses) whether those hypotheses were revealed in either accuracy or in response times. The data are in ‘alex_data.csv’.
+
+
+My approach for this problem was to test 2 hypotheses:
+
+1.) A contrast comparing the negative-social stimuli to all 5 other types of stimuli would have a significant main effect on both (A) accuracy and (B) reaction time
+2.) There is a significant interaction between the negative-social contrast and self-esteem.
+
+First, in final_q2_img1 I can see that the reaction time for the negative-social stimulus is a bit higher than the other groups, but it is not obviously significantly different. Further, in final_q2_img2 I can see that the reaction times are positively skewed as usual. To account for this I will use a glmer with a Gamma distribution to avoid transforming the rt dependent variable and relax assumptions of normality. I also checked the means and variances of both dependent variables by stimulus type and did not find evidence for a relationship between the two.
+
+Part 1: Accuracy
+
+Because response was a binary variable I tried two different models. First, I modeled it using a binomial family link function. I considered category to be fixed effect because as far as category valence (neg/pos/neut) and category sociality (social/nonsocial) go, all possible combinations are covered. These categories may be considered continuous, but they were not treated as such in this data. My other independent variables of interest are self-esteem and reaction time. I included random intercepts for both subjects and items because I wanted the findings to generalize to other participants and other pictures that would fit into these 6 categories.
+
+I first modeled response with an lmer, which produced the following results:
+Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite's
+  method [lmerModLmerTest]
+Formula: response ~ category * scale(se) + scale(rt) + (1 | subject) +  
+    (1 | stim)
+   Data: alex
+
+     AIC      BIC   logLik deviance df.resid 
+  2830.1   2938.9  -1399.0   2798.1     6608 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.4092  0.0615  0.2578  0.4587  2.5476 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ stim     (Intercept) 0.003261 0.05711 
+ subject  (Intercept) 0.004094 0.06398 
+ Residual             0.086137 0.29349 
+Number of obs: 6624, groups:  stim, 96; subject, 69
+
+Fixed effects:
+                      Estimate Std. Error         df t value Pr(>|t|)    
+(Intercept)          8.937e-01  1.031e-02  1.135e+02  86.680   <2e-16 ***
+category1            3.244e-02  1.534e-02  9.598e+01   2.115    0.037 *  
+category2           -4.568e-03  1.679e-02  9.569e+01  -0.272    0.786    
+category3           -2.520e-02  1.679e-02  9.571e+01  -1.501    0.137    
+category4            2.313e-02  1.679e-02  9.575e+01   1.378    0.172    
+category5           -1.269e-02  1.679e-02  9.570e+01  -0.756    0.452    
+scale(se)           -3.005e-03  8.509e-03  6.888e+01  -0.353    0.725    
+scale(rt)           -3.732e-02  4.063e-03  5.943e+03  -9.186   <2e-16 ***
+category1:scale(se) -1.066e-02  8.064e-03  6.459e+03  -1.322    0.186    
+category2:scale(se) -5.309e-04  8.834e-03  6.459e+03  -0.060    0.952    
+category3:scale(se)  7.038e-03  8.836e-03  6.460e+03   0.797    0.426    
+category4:scale(se)  6.083e-03  8.835e-03  6.460e+03   0.688    0.491    
+category5:scale(se) -9.676e-03  8.836e-03  6.460e+03  -1.095    0.274  
+
+This model found that the contrast for negative-social was a significant predictor of accuracy as hypothesized (p = 0.037). Reaction time was also found to be highly significant. However, there was no interaction between self-esteem and accuracy. This model yielded an AIC of 2830.1.
+
+Then, because response is binary, I fitted a glmer model using a binomial link function. I kept my fixed and random effect variables the same as in the lmer. This model had similar results, but it failed to converge and had a much higher AIC of 4141.5. From these results, I would stick with the lmer model because it has a lower AIC. So my conclusion is that there is a significant effect of negative-social stimuli (vs. all others) on accuracy, but there is no significant interaction with self-esteem.
+
+Part 2: Response Time
+
+To test response time, I used a glmer to test for main effects of category, self-esteem, response, and the interaction of category and self-esteem. I also include random subject and item effects. I used a glmer because rt data was very positively skewed, but I did not want to transform the data. Further, I used a Gamma with a log link function. These results were very similar to those of response accuracy, namely there was a significant effect of negative-social (vs. all other types) on reaction time (p=0.02), and response had a significant effect on rt. However, no interaction was found between the negative-social contrast and self-esteem.
+
+
+
+
+
+
+
+
+
+
+
+3. Andrea Robinson has been conducting research on the effect of exercise on ADHD (attention deficit hyperactivity disorder). The hypothesis is that regular exercise might ameliorate some of the deficits associated with ADHD. She and her colleagues ran an experiment with three types of rats: WKY rats are normal controls (who weren’t given exercise opportunities); SHR.NX rats who were genetically modified to exhibit ADHD (and who weren’t given exercise); and SHR.X rats who were the genetically modified strain but were given exercise prior to each test. The task was to learn a conditioned association between light and food. Each rat was run for 10 days, bigger numbers indicate better learning. The hypotheses were that the ADHD rats would show worse learning than controls but exercise would reduce or eliminate the difference. Finally, the female altered rats typically exhibit stronger symptoms than the male rats. Evaluate the various hypotheses. The data are in ‘adhd_for_class.csv’
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
