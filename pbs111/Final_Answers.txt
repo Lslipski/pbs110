@@ -2,11 +2,12 @@
 
 
 
-This data has only 11 observations and 15 variables, so the matrix is underdetermined. To converge on a solution, we will need to reduce the number of variables. Many of these are likely highly colinear because there are multiple measurements of publishing books and journals, getting citations, getting new grants and receiving awards. For a first pass, I'll look at the correlation matrix to decide on a subset of predictor variables. Then I'll try something smarter.
+This data has only 11 observations but 15 variables, so the matrix is underdetermined. To converge on a solution, I needed to reduce the number of variables. Many of these are likely highly colinear because there are multiple measurements of publishing books and journals, getting citations, getting new grants and receiving awards. For a first pass, I looked at the correlation matrix to decide on a subset of predictor variables.
 
-From the correlation matrix I saw a few things. (1) the number of faculty is not nearly as correlated with rank as all the other predictors. (2) probbook and booksper have a correlation of 0.94, so I will only keep booksper, since it has a slightly better correlation with rank. (3) probjour and jourper are somewhat highly correlated (0.60), and probjour correlates with probcite at 0.97. Meanwhile, jourper correlates with numcites at 0.91. Of these 4 variables I will only keep probcite and numcites, since these 2 are less correlated with each other than are probjour and jourper, but 'represent' all 4 variables in terms of correlation (4) citesper is relatively uncorrelated with other predictors, so I will keep it. (5) Probnewg and newgran are highly correlated, but probnewg is slightly more correlated with rank, so I will only keep it. (6) probawd and awards_p are correlated (0.97) and very similarly correlated with rank, so I will keep the one with slightly stronger rank correlation, which is awards_p. These observations confirm that there is likely high colinearity across these variables, especially among those within the same category (citations).
+Observations of Relationships Among Variables:
+From the correlation matrix I saw a few things. (1) the number of faculty is not nearly as correlated with rank as all the other predictors. (2) probbook and booksper have a correlation of 0.94, so I will only keep booksper. (3) probjour and jourper are somewhat highly correlated (0.60), and probjour correlates with probcite at 0.97. Meanwhile, jourper correlates with numcites at 0.91. Of these 4 variables I will only keep probcite and numcites, since these 2 are less correlated with each other than are probjour and jourper, but 'represent' all 4 variables in terms of correlation (4) citesper is relatively uncorrelated with other predictors, so I will keep it. (5) Probnewg and newgran are highly correlated, but probnewg is slightly more correlated with rank, so I will only keep it. (6) probawd and awards_p are correlated (0.97) and very similarly correlated with rank, so I will keep the one with slightly stronger rank correlation, which is awards_p. These observations confirm that there is likely high colinearity across these variables, especially among those within the same category (eg citations).
 
-For my first model I decided to keep: num_fac, booksper, probcite, numcites, citesper, probnewg, awards_p. I'll plan to run this model as is, then run a stepwise AIC to see if more variables can be removed. I will then also run a pca and identify variable loadings on dimensions that explain the most variation in the data. Using those variables I will produce a second model, test with stepAIC, and use whichever model gives me the lowest AIC.
+For my first model I decided to keep: num_fac, booksper, probcite, numcites, citesper, probnewg, awards_p. I ran this model as is, then rsn a stepwise AIC function to see if more variables could be removed. I then ran a pca and identified variable loadings on dimensions that explain the most variation in the data. Using those variables I produced a second model, tested with stepAIC, and used whichever model gave me the lowest AIC.
 
 Here are the results from my first model using dat_rank, rank, num_fac, booksper, probcite, numcites, citesper, probnewg, awards_p:
 
@@ -96,7 +97,7 @@ The root mean square of the residuals (RMSR) is  0.01
 
 Fit based upon off diagonal values = 1
 
-I then plotted the eigenvalues vs. the number of PCs in final_q1_img1.png. The PCA suggests that there are 4 significant components, and that these components together explain 80% of the variance in the data. These load most (equally) heavily on probawd and awards_p, then probjour, then new_gran, and finally grantdol. I'll use these in a second model and compare the AIC to the original.
+I then plotted the eigenvalues vs. the number of PCs in final_q1_img1.png. The PCA suggests that there are 4 significant components (eignevalues above 1), and that these components together explain 80% of the variance in the data. These load most (equally) heavily on probawd and awards_p, then probjour, then new_gran, and finally grantdol. I'll use these in a second model and compare the AIC to the original.
 
 Here are the results of a new model using dat_rank, rank, probawd, probjour, new_gran, and grantdol:
 
@@ -148,7 +149,7 @@ Multiple R-squared:  0.9658,	Adjusted R-squared:  0.9431
 F-statistic: 42.41 on 4 and 6 DF,  p-value: 0.0001554
 AIC:  30.45247
 
-Summary: The best model for predicting the rank of institutions was found using PCA to identify 4 principle componenets and the variables on which they most strongly load. This model included probawd, probjour, new_gran, and grantdol and had the lowest AIC of any model attempted by (30.45 vs. 44.09 next best), including one with a greater number of variables chosen based on the correlation matrix of the original data. All 4 variables in this model are significant predictors of rank and stepAIC does not further eliminate any of these variables. Of note, new_gran and grantdol are somewhat highly correlated (~0.6), but both significantly contribute to rank. Overall, it seems the rankings are most heavily based on awards, journal articles, and grants.
+Summary: The best model for predicting the rank of institutions was found using PCA to identify 4 principle componenets and the variables on which they most strongly load. This model included probawd, probjour, new_gran, and grantdol and had the lowest AIC of any model (30.45 vs. 44.09 next best), including one with a greater number of variables chosen based on the correlation matrix of the original data. All 4 variables in this model are significant predictors of rank and stepAIC does not further eliminate any of these variables. Of note, new_gran and grantdol are somewhat highly correlated (~0.6), but both significantly contribute to rank. Overall, it seems the rankings are most heavily based on awards, journal articles, and grants.
 
 
 I will now use this refined model to see how well these variables explain Ivy vs. not. I added a binary variable to the data to specify which schools were ivy league. I was interested to see if this variable would be a good predictor of rank, with the hypothesis being that ivy schools would be ranked higher than non-ivy leagues.
@@ -272,7 +273,7 @@ Residual standard error: 0.5495 on 9 degrees of freedom
 Multiple R-squared:  0.003519,	Adjusted R-squared:  -0.1072 
 F-statistic: 0.03178 on 1 and 9 DF,  p-value: 0.8624
 
-Summary: From this final test I would conclude that there does not seem to be an important role of ivy league vs. not ivy league in determining both school rank and grant dollars. After using PCA to determine the most explanatory variables, 4 variables were found to be significant predictors of rank. However, when ivy status was included in the model, ivy was found not found to be a significant predictor of rank, and stepAIC removed the ivy variables from the model to improve AIC. Further, these 4 variables were not found to significantly predict ivy league status. I would conclude that ivy league status and rank are somewhat independent, assuming that the top 11 schools on this list are representative of the longer list of institutions' ranks.
+Summary: From this final test I would conclude that there does not seem to be an important role of ivy league vs. not ivy league in determining both school rank and grant dollars. After using PCA to determine the most explanatory variables, 4 variables were found to be significant predictors of rank. However, when ivy status was included in the model, ivy was found not found to be a significant predictor of rank, and stepAIC removed the ivy variable from the model to improve AIC. Further, these 4 variables were not found to significantly predict ivy league status. I would conclude that ivy league status and rank are somewhat independent, assuming that the top 11 schools on this list are representative of the longer list of institutions' ranks.
 
 
 
@@ -298,7 +299,7 @@ First, in final_q2_img1 I can see that the reaction time for the negative-social
 
 Part 1: Accuracy
 
-Because response was a binary variable I tried two different models. First, I modeled it using a binomial family link function. I considered category to be fixed effect because as far as category valence (neg/pos/neut) and category sociality (social/nonsocial) go, all possible combinations are covered. These categories may be considered continuous, but they were not treated as such in this data. My other independent variables of interest are self-esteem and reaction time. I included random intercepts for both subjects and items because I wanted the findings to generalize to other participants and other pictures that would fit into these 6 categories.
+Because response was a binary variable I tried two different models. First, I modeled it using a binomial family link function. I considered category to be fixed effect because as far as category valence (neg/pos/neut) and category sociality (social/nonsocial) go, all possible combinations are covered. These categories could be considered continuous, but they were not treated as such in this experiment. My other independent variables of interest are self-esteem and reaction time. I included random intercepts for both subjects and items because I wanted the findings to generalize to other participants and other pictures that would fit into these 6 categories.
 
 I first modeled response with an lmer, which produced the following results:
 Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite's
@@ -343,10 +344,10 @@ Then, because response is binary, I fitted a glmer model using a binomial link f
 
 Part 2: Response Time
 
-To test response time, I used a glmer to test for main effects of category, self-esteem, response, and the interaction of category and self-esteem. I also include random subject and item effects. I used a glmer because rt data was very positively skewed, but I did not want to transform the data. Further, I used a Gamma with a log link function. These results were very similar to those of response accuracy, namely there was a significant effect of negative-social (vs. all other types) on reaction time (p=0.02), and response had a significant effect on rt. However, no interaction was found between the negative-social contrast and self-esteem.
+To test response time, I used a glmer to test for main effects of category, self-esteem, response, and the interaction of category and self-esteem. I also include random subject and item effects. I used a glmer because rt data was very positively skewed, but I did not want to transform the data. Further, I used a Gamma with a log link function. These results were very similar to those of response accuracy, namely there was a significant effect of negative-social (vs. all other types) stimulus on reaction time (p=0.02), and response accuracy had a significant effect on rt. However, no interaction was found between the negative-social contrast and self-esteem.
 
 
-
+Summary: Two models for predicting both response accuracy and reaction time found significant main effects of the negative-social contrast, as predicted, for both dependent variables. However, there was no significant effect of an interaction between the negative-social contrast and levels of self-esteem.
 
 
 
@@ -359,9 +360,9 @@ To test response time, I used a glmer to test for main effects of category, self
 
 Hypotheses: (1) There is a significant main effect of Group on learning such that SHR rats show worse learning than WKY rats. (2) The SHR.X rats show significantly better learning than the SHR.NX rats. 
 
-I will use 2 planned contrasts here to check for these effects. (1) will be WKY rats vs. SHR rats. (2) will be a contrast of SHR.NX rats vs. SHR.X rats. 
+I will use 2 planned contrasts here to check for these effects: (1) WKY rats vs. SHR rats. (2) SHR.NX rats vs. SHR.X rats. 
 
-First, I looked at the pairwise correlation matrix for all time points included in the data to look for any temporal autocorrelation structure. I did not see any obvious systematic autocorrelation. I then fit a basic lmer with random intercepts for subjects. I used this to take a look at autocorrelation (final_q3_img2) and distribution of residuals (final_q3_img3). No obvious autocorrelation (eg AR1) was present, so I will not try to correct for that using gls. The residuals were also normal looking, so I won't use a glmer to model learning. I then plotted learning values (final_q3_img1) against time points, and I found that some participants do vary in their slopes for each time point, so I will allow for random slopes for each time point within subject in my model. 
+First, I looked at the pairwise correlation matrix for all time points included in the data to look for any temporal autocorrelation structure. I did not see any obvious systematic autocorrelation. I then fit a basic lmer allowing for random intercepts for subjects. I used this to take a look at autocorrelation (final_q3_img2) and distribution of residuals (final_q3_img3). No obvious autocorrelation (eg AR1) was present, so I will not try to correct for that using gls. The residuals were also normal looking, so I won't use a glmer to model learning. I then plotted learning values (final_q3_img1) against time points, and I found that some participants do vary in their slopes for each time point, so I will allow for random slopes for each time point within subject in my model. 
 
 To fit my final model I included random slopes for time within subjects. This model showed the following:
 
@@ -395,7 +396,7 @@ time:Groupshrnx_v_shrx -0.10782    0.06767 47.99946  -1.593  0.11764
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-From this model, it seems that there is significant main effect of the first planned contrast of interest on learning. There seems to be a significant difference between WKY rats and SHR rats in learning, providing evidence for hypothesis 1. However, The second planned contrast of interest, SHR.NX vs. SHR.X, was not significant in this model, suggesting that exercise did not significantly effect learning in rats with ADHD. Finally, time had a significant effect on learning, as expected when rats learn over multiple sessions.
+Summary: From this model, it seems that there is a significant main effect of the first planned contrast of interest on learning. There seems to be a significant difference between WKY rats and SHR rats in learning, providing evidence for hypothesis 1. However, The second planned contrast of interest, SHR.NX vs. SHR.X, was not significant in this model, suggesting that exercise did not significantly affect learning in rats with ADHD. Finally, time had a significant effect on learning, as expected when rats learn over multiple sessions.
 
 
 
@@ -421,11 +422,68 @@ Lesioned rats are rats that received pre-training lesions of the retrosplenial c
 Hypothesis: RSC lesioned animals would not respond differently to all three types of cues, but intact rats would respond most strongly to the compound presentation. This is to say that there is a significant main effect of group on score, there is a significant main effect of stimulus on score, and that there is a significant interaction effect of group and stimulus on score.
 
 
+I first looked at the means and variances of Score by stimulus type. Of note, the variance of the C stimulus for the sham group is nearly twice that of the lesioned group. There seems to be no systematic relationship between the means and variances however. From the boxplots (final_q4_img1 and final_q4_img2) it looks like there may be less overlap of learning between the C and CL stimuli in the sham vs. lesioned rats. Though it isn't clear if CL vs. the rest is different between these groups. I'll include an interaction term to check for this effect.
+
+In final_q4_img3, I can see that the dependent variable is not normally distributed. I'll keep an eye on the residuals in my models to make sure I don't need to model it with a glmer and a non-gaussian link function. Further in final_q4_img4 I see that the slopes of scores change dramatically over time points. So I will allow for random slopes of Session within Subjects in my lmer.
+
+In my first lmer I only allowed for random intercepts for subjects. I also created a contrast of CL vs. C and L stimuli. This revealed that 1.) my residuals are approximately normally distributed, and therefore I will not use a glmer. Further, it revealed significant amounts of temporal autocorrelation in my residuals. I decided to add random slopes for Session within Subjects to see if this improved the model fit. The first model had an AIC of 3486. The new model yielded the following:
+
+Linear mixed model fit by maximum likelihood . t-tests use Satterthwaite's
+  method [lmerModLmerTest]
+Formula: Score ~ Stimulus * Group + Session + (1 + Session | Subject)
+   Data: dani
+
+     AIC      BIC   logLik deviance df.resid 
+  3296.9   3347.2  -1637.4   3274.9      709 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.0264 -0.5708  0.0188  0.5905  4.0185 
+
+Random effects:
+ Groups   Name        Variance Std.Dev. Corr 
+ Subject  (Intercept) 1.8647   1.3656        
+          Session     0.0844   0.2905   -0.83
+ Residual             4.9921   2.2343        
+Number of obs: 720, groups:  Subject, 15
+
+Fixed effects:
+                 Estimate Std. Error        df t value Pr(>|t|)    
+(Intercept)       1.80084    0.46350  20.43294   3.885  0.00089 ***
+Stimulus1         2.39955    0.17238 689.99988  13.920  < 2e-16 ***
+Stimulus2        -0.89651    0.21112 689.99988  -4.246 2.47e-05 ***
+Group             0.27467    0.45932  14.99953   0.598  0.55877    
+Session           0.25782    0.07715  14.99980   3.342  0.00446 ** 
+Stimulus1:Group  -0.27455    0.23604 689.99988  -1.163  0.24517    
+Stimulus2:Group  -0.53359    0.28909 689.99988  -1.846  0.06536 .  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+This model revealed a significant main effect of the Stimulus (CL vs. C and L). It also revealed a significant main effect of Session. It did not find a significant main effect of group or a significant interaction of Stimulus and Group. Finally, this model had an AIC of 3296, which was nearly 200 lower than the original model. However, this model also appeared to have quite a bit of autocorrelation. To account for this I also tried a series of gls models specifying various autocorrelation structures.
+
+Summary: Both AR1 models with equal and unequal variances outperformed the lmer in terms of AIC, and the model with unequal variance performed slightly better. This model had an AIC of 2898. Similar to the lmer it found a significant main effect of Stimulus (p <0.001) and Session (p < 0.001), but no main effect of group (p = 0.8) and no significant interaction between stimulus and group (p=0.4). Unfortunately, there still seems to be a quite a bit of autocorretion after using the gls, but the model fit is much better now than compared to the lmer, and both models produced very similar results.
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 
 
 
